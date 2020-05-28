@@ -1,0 +1,171 @@
+<html>
+    <head>
+        <title>Katapult Robomower</title>
+        <!-- update the version number as needed -->
+        <script defer src="./node_modules/firebase/firebase-app.js"></script>
+        <!-- include only the Firebase features as you need -->
+        <script defer src="./node_modules/firebase/firebase-auth.js"></script>
+        <script defer src="./node_modules/firebase/firebase-database.js"></script>
+        <style>
+            #controlContainer {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+            }
+            #controlRegion {
+                position: relative;
+                border-radius: 100%;
+                background: #EEE;
+            }
+            #controlPad {
+                position: absolute;
+                border-radius: 100%;
+                height: 30%;
+                width: 30%;
+                background: #222;
+                box-shadow: 2px 2px 2px rgba(0,0,0,0.4);
+            }           
+            #controlPad[animate] {
+                transition: all 0.2s;
+                transition-timing-function: cubic-bezier(0.2, 2, .75, .75);                
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <span>Robot Online:&nbsp;</span>
+            <span id="robotOnlineStatus"></span>
+        </div>
+        <div id="controlContainer">
+            <div id="controlRegion">
+                <div id="controlPad"></div>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+    /* global firebase */
+    
+    function setRobotState(online) {
+        document.getElementById('robotOnlineStatus').innerText = online;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        firebase.initializeApp({
+          "apiKey": "AIzaSyCZVmAGfHwlZGBFUtVGX7_PfL4YbCe_Vvw",
+          "authDomain": "katapult-robomower.firebaseapp.com",
+          "projectId": "katapult-robomower",
+          "databaseURL": "https://katapult-robomower.firebaseio.com"        
+        });
+        
+        function resizeJoystick() {
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            let smallest = w < h ? w : h;
+            document.getElementById('controlRegion').style.width = document.getElementById('controlRegion').style.height = smallest * 0.8 + 'px';
+            updateJoystickPosition();
+        }
+        
+        let missedCommand = null;
+        let throttling = false;
+        function setCommand(command) {
+            if (!command) return
+            if (throttling) {
+                missedCommand = command;
+            } else {
+                missedCommand = null;
+                firebase.database().ref('robomower/command').set(command);
+                throttling = true;
+                setTimeout(() => {
+                    throttling = false;
+                    setCommand(missedCommand);
+                }, 100);
+            }
+        }
+
+        function updateJoystickPosition(e) {
+            let controlRegion = document.getElementById('controlRegion');
+            let controlPad = document.getElementById('controlPad');
+            let coords = {x: 0, y: 0};
+            if (e) {
+                if (e.touches) e = e.touches[0];
+                // Get coords relative to the center of the control region.
+                let centerX = e.clientX - controlRegion.offsetLeft - controlRegion.offsetWidth / 2;
+                let centerY = -e.clientY + controlRegion.offsetTop + controlRegion.offsetHeight / 2;
+                // Get angle from center to mouse.
+                let theta = Math.atan2(centerY, centerX);
+                // Get X and Y on control region circle for this angle.
+                let circleX = (controlRegion.offsetWidth - controlPad.offsetWidth) / 2 * Math.cos(theta);
+                let circleY = (controlRegion.offsetHeight - controlPad.offsetHeight) / 2 * Math.sin(theta);
+                // Clamp X and Y to not go past these points.
+                coords.x = Math.abs(circleX) < Math.abs(centerX) ? circleX : centerX;
+                coords.y = Math.abs(circleY) < Math.abs(centerY) ? circleY : centerY;
+            }
+            controlPad.style.top = (controlRegion.offsetHeight - controlPad.offsetHeight) / 2 - coords.y + 'px';
+            controlPad.style.left = coords.x + (controlRegion.offsetWidth - controlPad.offsetWidth) / 2 + 'px';
+            let scaledCoords = {x: coords.x / ((controlRegion.offsetWidth - controlPad.offsetWidth) / 2), y: coords.y / ((controlRegion.offsetHeight - controlPad.offsetHeight) / 2)};
+            setCommand(`${scaledCoords.y * 160},${scaledCoords.x * 80}`);
+        }
+        
+        resizeJoystick();
+        window.addEventListener('resize', resizeJoystick);
+        
+        let trackPosition = false;
+        
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // Setup robot online.
+            let robotLastSeenTimeout;
+            firebase.database().ref('robomower/lastSeen').on('value', s => {
+                setRobotState(Date.now() - s.val() < 1000);
+                if (robotLastSeenTimeout) clearTimeout(robotLastSeenTimeout);
+                robotLastSeenTimeout = setTimeout(() => setRobotState(false), 1000);
+                
+            });
+            
+            setInterval(() => {
+                firebase.database().ref('clientLastSeen').set(firebase.database.ServerValue.TIMESTAMP);
+            }, 500);
+            
+            document.getElementById('controlPad').addEventListener('mousedown', (e) => {
+                trackPosition = true;
+                if (navigator.vibrate) navigator.vibrate(10)
+                document.getElementById('controlPad').removeAttribute('animate');
+                updateJoystickPosition(e);
+            });
+            document.getElementById('controlPad').addEventListener('touchstart', (e) => {
+                trackPosition = true;
+                if (navigator.vibrate) navigator.vibrate(10)
+                document.getElementById('controlPad').removeAttribute('animate');
+                updateJoystickPosition(e);
+            });        
+            window.addEventListener('mousemove', (e) => {
+                if (trackPosition) updateJoystickPosition(e);
+            });
+            window.addEventListener('touchmove', (e) => {
+                if (trackPosition) updateJoystickPosition(e);
+            });
+            window.addEventListener('mouseup', (e) => {
+                trackPosition = false;
+                document.getElementById('controlPad').setAttribute('animate', true);
+                updateJoystickPosition();
+            });
+            window.addEventListener('touchend', (e) => {
+                trackPosition = false;
+                document.getElementById('controlPad').setAttribute('animate', true);
+                updateJoystickPosition();
+            });
+            
+          } else {
+            let provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+            firebase.auth().signInWithPopup(provider);              
+          }
+        });        
+    });
+</script>

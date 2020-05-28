@@ -1,0 +1,6 @@
+{
+  "rules": {
+    ".read": "root.child('admins/' + auth.uid).val() === true",
+    ".write": "root.child('admins/' + auth.uid).val() === true"
+  }
+}
