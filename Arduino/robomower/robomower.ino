@@ -1,15 +1,16 @@
+
 #define HWSERIAL Serial
 
 #include "Motor.h"
 #include "PID.h"
 
-#include <Adafruit_BNO055.h>
-#include <Adafruit_Sensor.h>
+//#include <Adafruit_BNO055.h>
+//#include <Adafruit_Sensor.h>
 
 //#include <EEPROM.h>
 
-Motor leftMotor(33, 34, 35, A9, 36, 37, 4480);
-Motor rightMotor(14, 15, 16, A8, 38, 39, 4480);
+Motor leftMotor(33, 34, 18, A9, 36, 37, 4480);
+Motor rightMotor(14, 15, 19, A8, 38, 39, 4480);
 
 //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
@@ -51,8 +52,8 @@ void setup() {
 //  headingPID.setCircularInputMax(360);
 //  headingPID.setDeadband(2.5);
 
-//  leftMotor.enable();
-//  rightMotor.enable();
+  leftMotor.enable();
+  rightMotor.enable();
 }
 
 void loop() {
@@ -69,6 +70,7 @@ void loop() {
         leftMotor.enable();
         rightMotor.enable();
       }
+      
 //      else if (input == 'w') {0
 //        Serial.println("Writing BNO055 Calibration to EEPROM...");
 //        if (bno.getSensorOffsets(calibrationData)) {
@@ -112,7 +114,9 @@ void loop() {
 //  }
 
   if (micros() - printTimer > 10000) {
-    Serial.println(leftMotor.getCurrentDraw());
+    Serial.println(leftMotor.getSpeed());
+     Serial.println(rightMotor.getSpeed());
+     
     printTimer = micros();
 //    Serial.println(heading);
 //    byte system, gyro, accel, mag;
