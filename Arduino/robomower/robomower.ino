@@ -1,6 +1,8 @@
 
+#define USE_TEENSY_HW_SERIAL
 #define HWSERIAL Serial
 
+#include <ros.h>
 #include "Motor.h"
 #include "PID.h"
 
@@ -9,8 +11,8 @@
 
 //#include <EEPROM.h>
 
-Motor leftMotor(33, 34, 18, A9, 36, 37, 4480);
-Motor rightMotor(14, 15, 19, A8, 38, 39, 4480);
+Motor leftMotor(33, 34, 6, A9, 36, 37, 4480);
+Motor rightMotor(14, 15, 7, A8, 38, 39, 4480);
 
 //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
