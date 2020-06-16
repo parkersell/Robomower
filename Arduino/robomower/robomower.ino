@@ -11,8 +11,9 @@
 
 //#include <EEPROM.h>
 
-Motor leftMotor(33, 34, 6, A9, 36, 37, 4480);
-Motor rightMotor(14, 15, 7, A8, 38, 39, 4480);
+Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
+Motor rightMotor(14, 15, 6, A8, 38, 39, 4480);
+
 
 //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
@@ -26,6 +27,8 @@ unsigned long ledTimer = micros();
 unsigned long printTimer = micros();
 unsigned long imuTimer = micros();
 unsigned long stepTimer = micros();
+unsigned long inchTimer = micros();
+boolean inches = false;
 
 //adafruit_bno055_offsets_t calibrationData;
 
@@ -65,6 +68,7 @@ void loop() {
     char temp = HWSERIAL.read();
     Serial.print(temp);
     if (temp == '\n') {
+    
       if (input == 'd') {
         leftMotor.disable();
         rightMotor.disable();
@@ -82,6 +86,17 @@ void loop() {
 //          Serial.println("BNO055 is not fully calibrated yet");
 //        }
 //      }
+
+        else if (input == 'x') {
+       
+       
+        leftMotor.enable();
+        rightMotor.enable();
+       leftMotor.setSpeed(10);
+       rightMotor.setSpeed(10);
+       inchTimer = micros();
+       
+        }
       else {
         int commaIndex = input.indexOf(',');
         float speed = commaIndex == -1 ? input.toFloat() : input.substring(0, commaIndex).toFloat();
@@ -93,6 +108,11 @@ void loop() {
       input = "";
     } else input += temp;
   }
+        if(micros() - inchTimer > 2000000){
+        leftMotor.disable();
+        rightMotor.disable();}
+        
+        
 //
 //  if (micros() - imuTimer > 10000) {    
 //    imuTimer = micros();
@@ -116,8 +136,10 @@ void loop() {
 //  }
 
   if (micros() - printTimer > 10000) {
-    Serial.println(leftMotor.getSpeed());
-     Serial.println(rightMotor.getSpeed());
+   // Serial.println(leftMotor.getSpeed());
+   // Serial.println(rightMotor.getSpeed());
+      Serial.println((leftMotor.getSpeed()/60)*8*3.14);
+    Serial.println(micros() - inchTimer);
      
     printTimer = micros();
 //    Serial.println(heading);
