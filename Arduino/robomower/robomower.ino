@@ -2,9 +2,11 @@
 #define USE_TEENSY_HW_SERIAL
 #define HWSERIAL Serial
 
-#include <ros.h>
 #include "Motor.h"
 #include "PID.h"
+#include "Movement.h"
+
+
 
 //#include <Adafruit_BNO055.h>
 //#include <Adafruit_Sensor.h>
@@ -13,7 +15,9 @@
 
 Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
 Motor rightMotor(14, 15, 6, A8, 38, 39, 4480);
-
+Movement movement;
+double leftspeed = 0;
+double rightspeed = 0;
 
 //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
@@ -34,32 +38,34 @@ boolean inches = false;
 
 String input = "";
 
+
 void setup() {
   // put your setup code here, to run once:
-//  Serial.begin(115200);
+  //  Serial.begin(115200);
   HWSERIAL.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   rightMotor.invert(true);
 
-//  if(!bno.begin()) {
-//    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
-//    while(1);
-//  }
-//
-//  // Restore IMU calibration data on startup.
-//  EEPROM.get(0, calibrationData);
-//  bno.setSensorOffsets(calibrationData);
-//
-//  bno.setExtCrystalUse(true);
-//
-//  headingPID.setLimit(-20, 20);
-//  headingPID.setPOnM(true);
-//  headingPID.setCircularInputMax(360);
-//  headingPID.setDeadband(2.5);
+  //  if(!bno.begin()) {
+  //    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+  //    while(1);
+  //  }
+  //
+  //  // Restore IMU calibration data on startup.
+  //  EEPROM.get(0, calibrationData);
+  //  bno.setSensorOffsets(calibrationData);
+  //
+  //  bno.setExtCrystalUse(true);
+  //
+  //  headingPID.setLimit(-20, 20);
+  //  headingPID.setPOnM(true);
+  //  headingPID.setCircularInputMax(360);
+  //  headingPID.setDeadband(2.5);
 
   leftMotor.enable();
   rightMotor.enable();
 }
+
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -68,7 +74,7 @@ void loop() {
     char temp = HWSERIAL.read();
     Serial.print(temp);
     if (temp == '\n') {
-    
+
       if (input == 'd') {
         leftMotor.disable();
         rightMotor.disable();
@@ -76,31 +82,31 @@ void loop() {
         leftMotor.enable();
         rightMotor.enable();
       }
-      
-//      else if (input == 'w') {0
-//        Serial.println("Writing BNO055 Calibration to EEPROM...");
-//        if (bno.getSensorOffsets(calibrationData)) {
-//          EEPROM.put(0, calibrationData);
-//          Serial.println("BNO055 calibration written to EEPROM ADDR 0");
-//        } else {
-//          Serial.println("BNO055 is not fully calibrated yet");
-//        }
-//      }
 
-        else if (input == 'x') {
-       
-       
+      //      else if (input == 'w') {0
+      //        Serial.println("Writing BNO055 Calibration to EEPROM...");
+      //        if (bno.getSensorOffsets(calibrationData)) {
+      //          EEPROM.put(0, calibrationData);
+      //          Serial.println("BNO055 calibration written to EEPROM ADDR 0");
+      //        } else {
+      //          Serial.println("BNO055 is not fully calibrated yet");
+      //        }
+      //      }
+
+      else if (input == 'x') {
+
+
         leftMotor.enable();
         rightMotor.enable();
-       leftMotor.setSpeed(10);
-       rightMotor.setSpeed(10);
-       inchTimer = micros();
-       
-        }
+        leftMotor.setSpeed(20);
+        rightMotor.setSpeed(20);
+        inchTimer = micros();
+
+      }
       else {
         int commaIndex = input.indexOf(',');
         float speed = commaIndex == -1 ? input.toFloat() : input.substring(0, commaIndex).toFloat();
-//        headingSetPoint = speed;
+        //        headingSetPoint = speed;
         float turn = commaIndex == -1 ? 0 : input.substring(commaIndex + 1).toFloat();
         leftMotor.setSpeed(speed + turn);
         rightMotor.setSpeed(speed - turn);
@@ -108,67 +114,74 @@ void loop() {
       input = "";
     } else input += temp;
   }
-        if(micros() - inchTimer > 2000000){
-        leftMotor.disable();
-        rightMotor.disable();}
-        
-        
-//
-//  if (micros() - imuTimer > 10000) {    
-//    imuTimer = micros();
-//    byte system, gyro, accel, mag;
-//    bno.getCalibration(&system, &gyro, &accel, &mag);
-////    if (mag) {
-////      headingPID.setLimit(-100, 100);      
-////    } else {
-////      headingPID.setLimit(-10, 10);
-////    }
-//    if (true || system) {
-//      sensors_event_t event;
-//      bno.getEvent(&event);
-//      heading = event.orientation.x;
-//    } else {
-//      headingSetPoint = 0;
-//      headingTurnFactor = 25;
-//    }
-//    leftMotor.setSpeed(headingTurnFactor);
-//    rightMotor.setSpeed(-headingTurnFactor);
-//  }
 
-  if (micros() - printTimer > 10000) {
-   // Serial.println(leftMotor.getSpeed());
-   // Serial.println(rightMotor.getSpeed());
-      Serial.println((leftMotor.getSpeed()/60)*8*3.14);
-    Serial.println(micros() - inchTimer);
-     
-    printTimer = micros();
-//    Serial.println(heading);
-//    byte system, gyro, accel, mag;
-//    bno.getCalibration(&system, &gyro, &accel, &mag);
-//    Serial.print("Heading: ");
-//    Serial.print(heading);
-//    Serial.print("\tSys: ");
-//    Serial.print(system);
-//    Serial.print("\tGyro: ");
-//    Serial.print(gyro);
-//    Serial.print("\tAccel: ");
-//    Serial.print(accel);
-//    Serial.print("\tMag: ");
-//    Serial.println(mag);
+  //movement.goToPosition(leftspeed, rightspeed,0,0,0,10,10,0,50,1);
+
+  if (micros() - inchTimer > 7500000) {
+    leftMotor.disable();
+    rightMotor.disable();
   }
 
-//  if (micros() - stepTimer > 4000000) {
-//    stepTimer = micros();
-//    if (headingSetPoint == 90) headingSetPoint = 250;
-//    else headingSetPoint = 90;
-//  }
+
+  //
+  //  if (micros() - imuTimer > 10000) {
+  //    imuTimer = micros();
+  //    byte system, gyro, accel, mag;
+  //    bno.getCalibration(&system, &gyro, &accel, &mag);
+  ////    if (mag) {
+  ////      headingPID.setLimit(-100, 100);
+  ////    } else {
+  ////      headingPID.setLimit(-10, 10);
+  ////    }
+  //    if (true || system) {
+  //      sensors_event_t event;
+  //      bno.getEvent(&event);
+  //      heading = event.orientation.x;
+  //    } else {
+  //      headingSetPoint = 0;
+  //      headingTurnFactor = 25;
+  //    }
+  //    leftMotor.setSpeed(headingTurnFactor);
+  //    rightMotor.setSpeed(-headingTurnFactor);
+  //  }
+
+  if (micros() - printTimer > 10000) {
+    // Serial.println(leftMotor.getSpeed());
+    // Serial.println(rightMotor.getSpeed());
+    //Serial.println((leftMotor.getSpeed()/60)*8*3.14);
+    Serial.println(leftspeed);
+    Serial.println(rightspeed);
+    //Serial.println(micros() - inchTimer);
+
+
+    printTimer = micros();
+    //    Serial.println(heading);
+    //    byte system, gyro, accel, mag;
+    //    bno.getCalibration(&system, &gyro, &accel, &mag);
+    //    Serial.print("Heading: ");
+    //    Serial.print(heading);
+    //    Serial.print("\tSys: ");
+    //    Serial.print(system);
+    //    Serial.print("\tGyro: ");
+    //    Serial.print(gyro);
+    //    Serial.print("\tAccel: ");
+    //    Serial.print(accel);
+    //    Serial.print("\tMag: ");
+    //    Serial.println(mag);
+  }
+
+  //  if (micros() - stepTimer > 4000000) {
+  //    stepTimer = micros();
+  //    if (headingSetPoint == 90) headingSetPoint = 250;
+  //    else headingSetPoint = 90;
+  //  }
 
   if (micros() - ledTimer > 100000) {
     ledTimer = micros();
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
-  
+
   leftMotor.compute();
   rightMotor.compute();
-//  if (heading != -1) headingPID.compute();
+  //  if (heading != -1) headingPID.compute();
 }
