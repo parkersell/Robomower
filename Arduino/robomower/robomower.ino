@@ -5,8 +5,7 @@
 #include "Motor.h"
 #include "PID.h"
 #include "Movement.h"
-
-
+#include "Point.h"
 
 //#include <Adafruit_BNO055.h>
 //#include <Adafruit_Sensor.h>
@@ -37,6 +36,8 @@ boolean inches = false;
 //adafruit_bno055_offsets_t calibrationData;
 
 String input = "";
+Point p0 = Point(0, 0);
+Point p1 = Point(10, 10);
 
 
 void setup() {
@@ -64,6 +65,7 @@ void setup() {
 
   leftMotor.enable();
   rightMotor.enable();
+
 }
 
 
@@ -103,6 +105,11 @@ void loop() {
         inchTimer = micros();
 
       }
+
+      else if (input == 'm') {
+        leftMotor.setSpeed(leftspeed);
+        rightMotor.setSpeed(rightspeed);
+      }
       else {
         int commaIndex = input.indexOf(',');
         float speed = commaIndex == -1 ? input.toFloat() : input.substring(0, commaIndex).toFloat();
@@ -115,7 +122,8 @@ void loop() {
     } else input += temp;
   }
 
-  //movement.goToPosition(leftspeed, rightspeed,0,0,0,10,10,0,50,1);
+  
+  
 
   if (micros() - inchTimer > 7500000) {
     leftMotor.disable();
