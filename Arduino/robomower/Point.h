@@ -2,13 +2,16 @@
 #define Point_h
 //allows two numbers to be stored as an x,y point
 struct Point {
-  int x, y;
-  Point(int a, int b) {
+  double x, y;
+  Point(double a, double b) {
     this->x = a;
     this->y = b;
   }
+
+ 
 };
 
+ Point addPoint(Point, double ,double);
 
 
 #endif

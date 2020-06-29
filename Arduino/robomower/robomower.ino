@@ -1,22 +1,22 @@
-
 #define USE_TEENSY_HW_SERIAL
 #define HWSERIAL Serial
 
-#include "Motor.h"
-#include "PID.h"
+
 #include "Movement.h"
 #include "Point.h"
+
 
 //#include <Adafruit_BNO055.h>
 //#include <Adafruit_Sensor.h>
 
 //#include <EEPROM.h>
 
-Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
-Motor rightMotor(14, 15, 6, A8, 38, 39, 4480);
+
 Movement movement;
-double leftspeed = 0;
-double rightspeed = 0;
+Hardware hardware;
+
+
+
 
 //Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
@@ -36,16 +36,21 @@ boolean inches = false;
 //adafruit_bno055_offsets_t calibrationData;
 
 String input = "";
-Point p0 = Point(0, 0);
+double x = 0;
+double y = 0;
+Point p0 = Point(x,y);
 Point p1 = Point(10, 10);
-
+Point p2 = Point(3, 3);
 
 void setup() {
+  
+
+
   // put your setup code here, to run once:
-  //  Serial.begin(115200);
+  //Serial.begin(115200);
   HWSERIAL.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
-  rightMotor.invert(true);
+
 
   //  if(!bno.begin()) {
   //    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
@@ -63,26 +68,26 @@ void setup() {
   //  headingPID.setCircularInputMax(360);
   //  headingPID.setDeadband(2.5);
 
-  leftMotor.enable();
-  rightMotor.enable();
-
 }
-
-
 void loop() {
   // put your main code here, to run repeatedly:
 
+//movement.mowThread(leftspeed,rightspeed,p0,0,p1,p1,p1,p1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p1,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
   while (HWSERIAL.available()) {
+    p0 = Point(p0.x+1,p0.y+1);
+    
     char temp = HWSERIAL.read();
     Serial.print(temp);
     if (temp == '\n') {
-
+  movement.disableM();
       if (input == 'd') {
-        leftMotor.disable();
-        rightMotor.disable();
+        movement.disableM();
       } else if (input == 'e') {
-        leftMotor.enable();
-        rightMotor.enable();
+       movement.enableM();
       }
 
       //      else if (input == 'w') {0
@@ -97,37 +102,25 @@ void loop() {
 
       else if (input == 'x') {
 
-
-        leftMotor.enable();
-        rightMotor.enable();
-        leftMotor.setSpeed(20);
-        rightMotor.setSpeed(20);
-        inchTimer = micros();
-
       }
 
-      else if (input == 'm') {
-        leftMotor.setSpeed(leftspeed);
-        rightMotor.setSpeed(rightspeed);
-      }
+     
       else {
         int commaIndex = input.indexOf(',');
         float speed = commaIndex == -1 ? input.toFloat() : input.substring(0, commaIndex).toFloat();
         //        headingSetPoint = speed;
         float turn = commaIndex == -1 ? 0 : input.substring(commaIndex + 1).toFloat();
-        leftMotor.setSpeed(speed + turn);
-        rightMotor.setSpeed(speed - turn);
+        movement.setSpeedM(speed+turn,speed-turn);
       }
       input = "";
     } else input += temp;
   }
 
-  
+ 
   
 
   if (micros() - inchTimer > 7500000) {
-    leftMotor.disable();
-    rightMotor.disable();
+   movement.disableM();
   }
 
 
@@ -149,16 +142,16 @@ void loop() {
   //      headingSetPoint = 0;
   //      headingTurnFactor = 25;
   //    }
-  //    leftMotor.setSpeed(headingTurnFactor);
-  //    rightMotor.setSpeed(-headingTurnFactor);
+  //    hardware.leftMotor.setSpeed(headingTurnFactor);
+  //    hardware.rightMotor.setSpeed(-headingTurnFactor);
   //  }
 
   if (micros() - printTimer > 10000) {
-    // Serial.println(leftMotor.getSpeed());
-    // Serial.println(rightMotor.getSpeed());
-    //Serial.println((leftMotor.getSpeed()/60)*8*3.14);
+    
+    // Serial.println(hardware.rightMotor.getSpeed());
+    //Serial.println((hardware.leftMotor.getSpeed()/60)*8*3.14);
     Serial.println(leftspeed);
-    Serial.println(rightspeed);
+    Serial.println("hi");
     //Serial.println(micros() - inchTimer);
 
 
@@ -189,7 +182,7 @@ void loop() {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
 
-  leftMotor.compute();
-  rightMotor.compute();
+  hardware.leftMotor.compute();
+  hardware.rightMotor.compute();
   //  if (heading != -1) headingPID.compute();
 }
