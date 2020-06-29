@@ -13,6 +13,7 @@
 
 
 Movement movement;
+Hardware hardware;
 
 
 
@@ -49,16 +50,33 @@ void setup() {
   //Serial.begin(115200);
   HWSERIAL.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
-  movement.initRobot();
+
+
+  //  if(!bno.begin()) {
+  //    Serial.println("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
+  //    while(1);
+  //  }
+  //
+  //  // Restore IMU calibration data on startup.
+  //  EEPROM.get(0, calibrationData);
+  //  bno.setSensorOffsets(calibrationData);
+  //
+  //  bno.setExtCrystalUse(true);
+  //
+  //  headingPID.setLimit(-20, 20);
+  //  headingPID.setPOnM(true);
+  //  headingPID.setCircularInputMax(360);
+  //  headingPID.setDeadband(2.5);
+
 }
 void loop() {
   // put your main code here, to run repeatedly:
 
 //movement.mowThread(leftspeed,rightspeed,p0,0,p1,p1,p1,p1);
-movement.goToPosition( p0,0,p1,0,50,1);
-movement.goToPosition(p0,0,p2,0,50,1);
-movement.goToPosition(p0,0,p2,0,50,1);
-movement.goToPosition(p0,0,p2,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p1,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
+movement.goToPosition(leftspeed, rightspeed,p0,0,p2,0,50,1);
   while (HWSERIAL.available()) {
     p0 = Point(p0.x+1,p0.y+1);
     
@@ -129,11 +147,28 @@ movement.goToPosition(p0,0,p2,0,50,1);
   //  }
 
   if (micros() - printTimer > 10000) {
-   
+    
+    // Serial.println(hardware.rightMotor.getSpeed());
+    //Serial.println((hardware.leftMotor.getSpeed()/60)*8*3.14);
+    Serial.println(leftspeed);
     Serial.println("hi");
     //Serial.println(micros() - inchTimer);
+
+
     printTimer = micros();
-  
+    //    Serial.println(heading);
+    //    byte system, gyro, accel, mag;
+    //    bno.getCalibration(&system, &gyro, &accel, &mag);
+    //    Serial.print("Heading: ");
+    //    Serial.print(heading);
+    //    Serial.print("\tSys: ");
+    //    Serial.print(system);
+    //    Serial.print("\tGyro: ");
+    //    Serial.print(gyro);
+    //    Serial.print("\tAccel: ");
+    //    Serial.print(accel);
+    //    Serial.print("\tMag: ");
+    //    Serial.println(mag);
   }
 
   //  if (micros() - stepTimer > 4000000) {
@@ -147,6 +182,7 @@ movement.goToPosition(p0,0,p2,0,50,1);
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
 
-movement.computeM();
+  hardware.leftMotor.compute();
+  hardware.rightMotor.compute();
   //  if (heading != -1) headingPID.compute();
 }

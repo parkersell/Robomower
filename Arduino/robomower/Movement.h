@@ -3,14 +3,23 @@
 #include "Motor.h"
 #include "Point.h"
 #include "Hardware.h"
-#include "Subscriber.h"
 class Movement {
   public:
     Movement();
 
+     struct everything {
+      Point Pose;
+      double heading;
+      Point topleft;
+      Point topright;
+      Point bottomleft;
+      Point bottomright;
+    };
     
-    void goToPosition(Point, double, Point, double, double, double);
-    void mowLawn(Point, double, Point, Point, Point, Point);
+    void goToPosition(double, double, Point, double, Point, double, double, double);
+    void mowLawn(double, double, everything);
+    //void mowThread(double, double, Point, double, Point, Point, Point, Point);
+    void test(double&, double&, everything);
     void disableM();
     void enableM();
     void computeM();
@@ -22,7 +31,6 @@ class Movement {
     inline double to_radians(double);
     inline double to_degrees(double);
     float clip(float, float, float);
-    
 
 
 };
