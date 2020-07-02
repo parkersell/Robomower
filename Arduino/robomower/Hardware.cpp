@@ -5,6 +5,4 @@ Hardware::Hardware():leftMotor(33, 34, 7, A9, 36, 37, 4480),rightMotor(14, 15, 6
 {
  rightMotor.invert(true);
 
-  leftMotor.disable();
-  rightMotor.disable();
 }

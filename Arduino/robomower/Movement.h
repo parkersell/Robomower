@@ -9,12 +9,16 @@ class Movement {
     Movement();
 
     
-    void goToPosition(Point, double, Point, double, double, double);
-    void mowLawn(Point, double, Point, Point, Point, Point);
+    void goToPosition(double, Point, double, double, double);
+    void mowLawn(double, Point, Point, Point, Point);
     void disableM();
     void enableM();
     void computeM();
     void setSpeedM(int, int);
+    float getSpeedM();
+    void initRobot();
+    void spinOnceM();
+    Point getPosition();
 
    
 

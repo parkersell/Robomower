@@ -20,7 +20,7 @@ void positionCallback(const geometry_msgs::PoseStamped& pos) {
 }*/
 
 
-ros::Subscriber<geometry_msgs::PoseStamped> pose_subscriber("/orb_slam2_mono/pose", positionCallback);
+ros::Subscriber<geometry_msgs::PoseStamped> pose_subscriber("/orb_slam2_rgbd/pose", positionCallback);
 //ros::Subscriber<geometry_msgs::Pose> pose_subscriber("/orb_slam2_mono/pose", positionCallback);
 //ros::Subscriber<list> list_subscriber("echo", &objectAvoidanceCallback);//echo topic that displays list of x y z coordinates of the objects
 

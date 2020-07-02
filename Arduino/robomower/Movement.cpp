@@ -13,11 +13,17 @@ Movement::Movement() {
 
 }
 
+
+void Movement::spinOnceM(){
+  subscriber.spinOnceS();
+  }
 void Movement::initRobot(){
   disableM();
-  subscriber.initSlam();
+  subscriber.initSLAM();
   }
-
+float Movement::getSpeedM(){
+  hardware.leftMotor.getSetSpeed();
+}
 void Movement::enableM(){
     hardware.leftMotor.enable();
     hardware.rightMotor.enable();
@@ -38,6 +44,12 @@ void Movement::computeM(){
     hardware.rightMotor.compute();
   }
 
+
+Point Movement::getPosition(){
+    Point p1 = subscriber.getPosition();
+    return p1;
+  }
+
 inline double Movement::to_radians(double degrees) {
   return degrees * (M_PI / 180.0);
 }
@@ -51,7 +63,7 @@ float Movement::clip(float n, float lower, float upper) {
 }
   
 void Movement::goToPosition(double theta, Point p2, double headingtarget, double rpm, double maxerror) {
-  Point p1 = subscriber.getPosition();
+  Point p1  = subscriber.getPosition();
   
   double leftpower = 0;
   double rightpower = 0;
@@ -66,8 +78,8 @@ void Movement::goToPosition(double theta, Point p2, double headingtarget, double
   double ydistance = ytarget - ypose; //Difference between target y and actual y
   double distance = hypot(xdistance, ydistance);
 
-  while(distance > maxerror) {
-    
+  if(distance > maxerror) {
+  //spinOnceM();
     
     distance = hypot(xdistance, ydistance);
     xdistance = xtarget - xpose; //Difference between target x and actual x
@@ -87,10 +99,11 @@ void Movement::goToPosition(double theta, Point p2, double headingtarget, double
     rightpower = xcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
     leftpower = xcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
     setSpeedM(leftpower,rightpower);
+    computeM();
 
   }
 
-    setSpeedM(0,0);
+ 
  
 
 }
@@ -121,10 +134,10 @@ void Movement::mowLawn(double heading, Point topleft, Point topright, Point bott
   //assume start in bottom left corner
 
 
-  goToPosition(Pose, heading, bottomright, 90, 20, 1);    
-  goToPosition( Pose, heading, topright, 0, 20, 1);
-  goToPosition( Pose, heading, topleft, 270, 20, 1);
-  goToPosition( Pose, heading, bottomleft, 0, 20, 1);
+  goToPosition(heading, bottomright, 90, 20, 1);    
+  goToPosition(heading, topright, 0, 20, 1);
+  goToPosition(heading, topleft, 270, 20, 1);
+  goToPosition(heading, bottomleft, 0, 20, 1);
 
 
   topleft = Point(topleft.x - 5, topleft.y + 5);
