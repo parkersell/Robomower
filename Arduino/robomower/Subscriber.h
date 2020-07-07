@@ -15,13 +15,17 @@ class Subscriber {
 void positionCallback(const geometry_msgs::PoseStamped&); 
 //void cmdCallback(const std_msgs::String&);
 Point getPosition();
+double getHeading();
 //char getCommand();
 void initSLAM();
 void spinOnceS();
 
 
   private:
-  
+  inline double to_degrees(double radians) {
+  return radians * (180.0 / M_PI);
+}
+
 };
 
 #endif

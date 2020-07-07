@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "Subscriber.h"
+#include <math.h>
 
 
 
@@ -11,6 +12,7 @@ geometry_msgs::Pose p;
 std_msgs::String cmd;
 double toast = 0; //x
 double eggs = 0; //y
+double sausage = 0; //w
 //char returncmd = '\0';
 
 
@@ -19,6 +21,8 @@ void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
  //map planning algorithm that translates pose into a motor command
   toast = pos.pose.position.x;
   eggs = pos.pose.position.y;
+  sausage= pos.pose.orientation.w;
+  
 }
 //void Subscriber::cmdCallback(const std_msgs::String& cmd){
   //returncmd = cmd.data;
@@ -30,6 +34,10 @@ Point Subscriber::getPosition(){
 //char Subscriber::getCommand(){
  // return returncmd;
 //}
+double Subscriber::getHeading(){
+  double heading = to_degrees(2* acos(sausage));
+  return heading;
+}
 
   
 

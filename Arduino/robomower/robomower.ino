@@ -49,7 +49,7 @@ void setup() {
 
   // put your setup code here, to run once:
   //Serial1.begin(115200);
-  HWSERIAL.begin(9600);
+  HWSERIAL.begin(57600);
   pinMode(LED_BUILTIN, OUTPUT);
   movement.initRobot();
 }
@@ -88,7 +88,7 @@ void loop() {
       } else input += temp;
     } */
 
-      while (Serial1.available()) {
+      while (HWSERIAL.available()) {
      
       char temp = HWSERIAL.read();
       HWSERIAL.print(temp);
@@ -96,14 +96,15 @@ void loop() {
       if (temp == '\n') {
         if (input2 == 'd') {
           movement.disableM();
+          
         } else if (input2 == 'e') {
           
           movement.enableM();
 
         }
 
-        else if (input == 'x') {
-          movement.goToPosition(0, p1, 0, 10, 1);
+        else if (input2 == 'x') {
+          movement.goToPosition(p1, 0, 30, 2);
         }
 
         else {
@@ -119,7 +120,7 @@ void loop() {
   
 
 
-  if (micros() - printTimer > 10000) {
+  if (micros() - printTimer > 50000) {
 
 
     Point p = movement.getPosition();

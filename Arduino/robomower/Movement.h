@@ -9,7 +9,7 @@ class Movement {
     Movement();
 
     
-    void goToPosition(double, Point, double, double, double);
+    void goToPosition(Point, double, double, double);
     void mowLawn(double, Point, Point, Point, Point);
     void disableM();
     void enableM();
