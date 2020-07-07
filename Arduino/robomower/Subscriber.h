@@ -5,6 +5,7 @@
 #include <geometry_msgs/Pose.h>
 #include <std_msgs/String.h>
 #include "Point.h"
+#include "Quat.h"
 
 class Subscriber {
   public:
@@ -15,7 +16,7 @@ class Subscriber {
 void positionCallback(const geometry_msgs::PoseStamped&); 
 //void cmdCallback(const std_msgs::String&);
 Point getPosition();
-double getHeading();
+double getRoll();
 //char getCommand();
 void initSLAM();
 void spinOnceS();

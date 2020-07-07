@@ -7,7 +7,9 @@
 class Movement {
   public:
     Movement();
-
+    struct Quaternion {
+    double w, x, y, z;
+}
     
     void goToPosition(Point, double, double, double);
     void mowLawn(double, Point, Point, Point, Point);

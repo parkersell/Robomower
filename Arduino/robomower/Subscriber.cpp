@@ -12,31 +12,38 @@ geometry_msgs::Pose p;
 std_msgs::String cmd;
 double toast = 0; //x
 double eggs = 0; //y
-double sausage = 0; //w
-//char returncmd = '\0';
+//orientation
+double fruit = 0; //w
+double cereal = 0; //x
+double pancakes = 0;//y
+double syrup =0; //z
+
 
 
 
 void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
- //map planning algorithm that translates pose into a motor command
+  
   toast = pos.pose.position.x;
   eggs = pos.pose.position.y;
-  sausage= pos.pose.orientation.w;
+  
+  fruit = pos.pose.orientation.w;
+  cereal = pos.pose.orientation.x;
+  pancakes = pos.pose.orientation.y;
+  syrup = pos.pose.orientation.z;
   
 }
-//void Subscriber::cmdCallback(const std_msgs::String& cmd){
-  //returncmd = cmd.data;
-//}
+
 Point Subscriber::getPosition(){
    Point location = Point(toast, eggs);
    return location;
   }
-//char Subscriber::getCommand(){
- // return returncmd;
-//}
-double Subscriber::getHeading(){
-  double heading = to_degrees(2* acos(sausage));
-  return heading;
+
+
+double Subscriber::getRoll(){
+  double sinr_cosp = 2 * (fruit * cereal + pancakes * syrup);
+  double cosr_cosp = 1 - 2 * (cereal * cereal + pancakes * pancakes);
+  double roll = atan2(sinr_cosp, cosr_cosp);
+  return roll;
 }
 
   
