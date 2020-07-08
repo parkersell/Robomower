@@ -5,7 +5,6 @@
 #include <geometry_msgs/Pose.h>
 #include <std_msgs/String.h>
 #include "Point.h"
-#include "Quat.h"
 
 class Subscriber {
   public:

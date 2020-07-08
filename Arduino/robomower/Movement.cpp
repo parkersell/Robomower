@@ -24,7 +24,8 @@ void Movement::initRobot() {
   subscriber.initSLAM();
 }
 float Movement::getSpeedM() {
-  hardware.leftMotor.getSetSpeed();
+  float h = hardware.leftMotor.getSetSpeed();
+  return h;
 }
 
 
@@ -100,12 +101,13 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
           enableM();
         }
         input2 = "";
+
       } else input2 += temp;
     }
 
     spinOnceM();
     p1  = subscriber.getPosition();
-    theta = subscriber.getHeading();
+    theta = subscriber.getYaw();
     xpose = p1.x;
     ypose = p1.y;
 
@@ -119,23 +121,33 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
     Serial1.print("dist: ");
     Serial1.println(distance);
     Serial1.print("theta: ");
-    Serial1.print(theta);
+    Serial1.println(theta);
+
 
     double xcorrect = clip(xdistance, -rpm, rpm);
+    double ycorrect = clip(ydistance, -rpm, rpm);
     double angleCorrection = headingtarget - theta;
-    double kp = .75;
-    rightpower = xcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
-    leftpower = xcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
+    double yangleCorrection = -90 - theta;
+    double kp = .5;
+
+    if (ydistance > maxerror) {
+      rightpower = -ycorrect * (cos(to_radians(yangleCorrection)) + kp * sin(to_radians(yangleCorrection)));
+      leftpower = -ycorrect * (cos(to_radians(yangleCorrection)) - kp * sin(to_radians(yangleCorrection)));
+    }
+
+    else {
+      rightpower = xcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
+      leftpower = xcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
+
+    }
     setSpeedM(leftpower, rightpower);
     computeM();
   }
   setSpeedM(0, 0);
   computeM();
   return;
+
 }
-
-
-
 
 void Movement::mowLawn(double heading, Point topleft, Point topright, Point bottomleft, Point bottomright) {
   Point Pose = subscriber.getPosition();

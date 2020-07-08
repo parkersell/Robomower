@@ -47,6 +47,7 @@ double Subscriber::getYaw() {
   double siny_cosp = 2 * (fruit * syrup + cereal * pancakes);
   double cosy_cosp = 1 - 2 * (pancakes * pancakes + syrup * syrup);
   double yaw = atan2(siny_cosp, cosy_cosp);
+  yaw = to_degrees(yaw);
   return yaw;
 }
 

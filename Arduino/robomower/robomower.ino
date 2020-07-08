@@ -37,7 +37,7 @@ String input2 = "";
 double x = 0;
 double y = 0;
 Point p0 = Point(x, y);
-Point p1 = Point(10, 0);
+Point p1 = Point(10, -5);
 Point p2 = Point(3, 3);
 
 //Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
@@ -124,10 +124,11 @@ void loop() {
 
 
     Point p = movement.getPosition();
-
+    
     //Serial.println(micros() - inchTimer);
     HWSERIAL.println(p.x);
     HWSERIAL.println(p.y);
+    
    // movement.spinOnceM();
     //movement.enableM();
     //movement.goToPosition(0, p1, 0, 10, 1);
