@@ -76,7 +76,7 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
 
   double xpose = p1.x;
   double ypose = p1.y;
-  double theta = subscriber.getHeading();
+  double theta = subscriber.getYaw();
 
   double xtarget = p2.x;
   double ytarget = p2.y;
@@ -84,7 +84,7 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
   double xdistance = xtarget - xpose; //Difference between target x and actual x
   double ydistance = ytarget - ypose; //Difference between target y and actual y
   double distance = hypot(xdistance, ydistance);
-String input2 = "";
+  String input2 = "";
 
   while (distance > maxerror) {
 
@@ -96,24 +96,18 @@ String input2 = "";
       if (temp == '\n') {
         if (input2 == 'd') {
           disableM();
-
         } else if (input2 == 'e') {
-
           enableM();
-
         }
-
         input2 = "";
       } else input2 += temp;
     }
-
 
     spinOnceM();
     p1  = subscriber.getPosition();
     theta = subscriber.getHeading();
     xpose = p1.x;
     ypose = p1.y;
-
 
     distance = hypot(xdistance, ydistance);
     xdistance = xtarget - xpose; //Difference between target x and actual x
@@ -127,13 +121,6 @@ String input2 = "";
     Serial1.print("theta: ");
     Serial1.print(theta);
 
-    /*
-        //holonomic kinematics
-        double movementAngle = to_degrees(atan2(xdistance, ydistance)); //Basically a unit circle where 0 degrees is forward.
-        double xcorrect = sin(to_radians(movementAngle)) * rpm; //Both these methods return how far off the robot is relative to the x and y coordinates regardless of heading
-        double ycorrect = cos(to_radians(movementAngle)) * rpm;
-    */
-
     double xcorrect = clip(xdistance, -rpm, rpm);
     double angleCorrection = headingtarget - theta;
     double kp = .75;
@@ -141,15 +128,10 @@ String input2 = "";
     leftpower = xcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
     setSpeedM(leftpower, rightpower);
     computeM();
-
   }
-
-
   setSpeedM(0, 0);
   computeM();
   return;
-
-
 }
 
 

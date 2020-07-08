@@ -4,7 +4,7 @@
 
 
 
-Subscriber::Subscriber():  pose_subscriber("/orb_slam2_rgbd/pose", &positionCallback,this)
+Subscriber::Subscriber():  pose_subscriber("/orb_slam2_rgbd/pose", &positionCallback, this)
 {}
 ros::NodeHandle nh;
 geometry_msgs::PoseStamped pos;
@@ -16,48 +16,50 @@ double eggs = 0; //y
 double fruit = 0; //w
 double cereal = 0; //x
 double pancakes = 0;//y
-double syrup =0; //z
+double syrup = 0; //z
 
 
 
 
 void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
-  
   toast = pos.pose.position.x;
   eggs = pos.pose.position.y;
-  
+
   fruit = pos.pose.orientation.w;
   cereal = pos.pose.orientation.x;
   pancakes = pos.pose.orientation.y;
   syrup = pos.pose.orientation.z;
-  
 }
 
-Point Subscriber::getPosition(){
-   Point location = Point(toast, eggs);
-   return location;
-  }
+Point Subscriber::getPosition() {
+  Point location = Point(toast, eggs);
+  return location;
+}
 
-
-double Subscriber::getRoll(){
+double Subscriber::getRoll() {
   double sinr_cosp = 2 * (fruit * cereal + pancakes * syrup);
   double cosr_cosp = 1 - 2 * (cereal * cereal + pancakes * pancakes);
   double roll = atan2(sinr_cosp, cosr_cosp);
   return roll;
 }
 
-  
+double Subscriber::getYaw() {
+  double siny_cosp = 2 * (fruit * syrup + cereal * pancakes);
+  double cosy_cosp = 1 - 2 * (pancakes * pancakes + syrup * syrup);
+  double yaw = atan2(siny_cosp, cosy_cosp);
+  return yaw;
+}
 
-void Subscriber::initSLAM(){
-   nh.initNode();
+
+void Subscriber::initSLAM() {
+  nh.initNode();
   nh.subscribe(pose_subscriber);
 
-  }
+}
 
 
-void Subscriber::spinOnceS(){
+void Subscriber::spinOnceS() {
   nh.spinOnce();
   //delay(50);//with no delay we get position, but no motor control
-//nh.spin();
-  }
-  
+  //nh.spin();
+}
