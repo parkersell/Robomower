@@ -1,6 +1,8 @@
 
 #include "PurePursuit.h"
 #include <Arduino.h>
+#define USE_TEENSY_HW_SERIAL
+#define HWSERIAL Serial1
 
 // Constructor.
 PurePursuit::PurePursuit(double* xPos, double* yPos, double *heading, double LOOK_AHEAD, unsigned long INTERVAL, int STOP_POINT)
@@ -112,8 +114,8 @@ void PurePursuit::compute()
 
 		// 4. Transform the goal point to vehicle coordinates.
 		// First translate it such that the origin is the robot.
-		float xGoalTranslated = _goalX - xPos;
-		float yGoalTranslated = _goalY - yPos;
+		float xGoalTranslated = _goalX - xPos; //8.59
+		float yGoalTranslated = _goalY - yPos; //8.59
 		// Second rotate the coordinate system such that the wheel axle points to the x-axis.
 		double xGoalRelRobot = xGoalTranslated * cos(phi) + yGoalTranslated * sin(phi);
 
@@ -165,7 +167,7 @@ void PurePursuit::compute()
 			}
 		}
 
-		_prevComputeTime = millis();
+		_prevComputeTime = millis(); 
 	}
 }
 

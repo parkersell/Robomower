@@ -1,5 +1,6 @@
 #include "PreMo.h"
-
+#define USE_TEENSY_HW_SERIAL
+#define HWSERIAL Serial1
 
 /*
 --------------------------------------------------------------------------------------------
@@ -16,7 +17,7 @@ PreMo::PreMo(float radius, float length, double kp, double ki, double kd)
 
 
 // Init PID
-  _pid = new PIDv1(&_input, &_output, &_setpoint, kp, 0, kd, DIRECT);
+  _pid = new PIDv1(&_input, &_output, &_setpoint, kp, ki, kd, DIRECT);
   (*_pid).SetSampleTime(PID_SAMPLE_TIME);
   (*_pid).SetOutputLimits(-PID_MOTOR_OUTPUT_RANGE, PID_MOTOR_OUTPUT_RANGE);
   (*_pid).SetMode(AUTOMATIC);
@@ -41,6 +42,7 @@ void PreMo::goToDelta(float deltaX, float deltaY)
 
 void PreMo::goTo(float x, float y)
 {
+  
 	Subscriber& dr = *_deadReckoner;
 	double xr = dr.getX();
 	double yr = dr.getY();
@@ -267,6 +269,7 @@ void PreMo::startPathFollowing(float* pathX, float* pathY, int pathLength)
 
 void PreMo::startPathFollowing(float* pathX, float* pathY, int pathLength, bool isForward, bool setLocation)
 {
+	HWSERIAL.println("STARTPATHWORKS");
 	// Set starting position to first path location point with robot pointing towards the next point.
 	double x0 = pathX[0];
 	double y0 = pathY[0];
@@ -297,12 +300,12 @@ void PreMo::startPathFollowing(float* pathX, float* pathY, int pathLength, bool 
 	}
 
 	(*_purePursuit).setPath(pathX, pathY, pathLength);
-	// (*_purePursuit).printPath();
+	(*_purePursuit).printPath();
 
 	_moveReverse = !isForward;
 	_isFollowingPath = true;
 	(*_purePursuit).start();
-	
+	HWSERIAL.println("PPSTARTS");
 	// TODO Remove
 	// double x = dr.getX();
 	// double y = dr.getY();
@@ -327,17 +330,17 @@ void PreMo::stop()
 
 void PreMo::continuePathFollowing()
 {
-	// f
-	(*_purePursuit).compute();
 
+	(*_purePursuit).compute();
 	// Compute PID
 	_input = (*_purePursuit).getCurvature();
-	(*_pid).Compute();
+	  (*_pid).Compute();
 
 	// Move the robot
 	// Serial.print("output: "); Serial.println(_output);
-	moveMotors(_motorSpeed, _output);
-    //movementP.setSpeedM(_motorSpeed)
+   movementP.enableM();
+    moveMotors(_motorSpeed, _output);
+  
 
 	if ((*_purePursuit).checkStop())
 	{
@@ -393,6 +396,7 @@ void PreMo::moveMotors(int motorSpeed, double diff)
 		
    movementP.setSpeedM(-speedLeft,-speedRight);
 	}
+ movementP.computeM();
 }
 
 double PreMo::getX()

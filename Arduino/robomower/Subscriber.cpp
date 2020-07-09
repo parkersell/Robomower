@@ -17,7 +17,7 @@ double fruit = 0; //w
 double cereal = 0; //x
 double pancakes = 0;//y
 double syrup = 0; //z
-
+double heading = 0;
 
 
 
@@ -29,6 +29,7 @@ void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
   cereal = pos.pose.orientation.x;
   pancakes = pos.pose.orientation.y;
   syrup = pos.pose.orientation.z;
+  heading = getYaw();
 }
 
 Point Subscriber::getPosition() {
@@ -58,8 +59,7 @@ double* Subscriber::getYPointer() {
   return &eggs;
 }
 double* Subscriber::getHeadingPointer() {
-  double heading = getYaw();
-  heading = heading * DEG_TO_RAD;
+ 
   return &heading;
 }
 double Subscriber::getX() {
@@ -70,7 +70,6 @@ double Subscriber::getY() {
   return eggs;
 }
 double Subscriber::getHeading() {
-  double heading = getYaw();
   heading = heading * DEG_TO_RAD;
   return heading;
 }
