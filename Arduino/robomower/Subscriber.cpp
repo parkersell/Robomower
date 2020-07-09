@@ -50,8 +50,30 @@ double Subscriber::getYaw() {
   yaw = to_degrees(yaw);
   return yaw;
 }
+double* Subscriber::getXPointer() {
+  return &toast;
+}
 
+double* Subscriber::getYPointer() {
+  return &eggs;
+}
+double* Subscriber::getHeadingPointer() {
+  double heading = getYaw();
+  heading = heading * DEG_TO_RAD;
+  return &heading;
+}
+double Subscriber::getX() {
+  return toast;
+}
 
+double Subscriber::getY() {
+  return eggs;
+}
+double Subscriber::getHeading() {
+  double heading = getYaw();
+  heading = heading * DEG_TO_RAD;
+  return heading;
+}
 void Subscriber::initSLAM() {
   nh.initNode();
   nh.subscribe(pose_subscriber);

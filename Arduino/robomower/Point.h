@@ -11,7 +11,9 @@ struct Point {
  
 };
 
- Point addPoint(Point, double ,double);
+ 
+
+
 
 
 #endif

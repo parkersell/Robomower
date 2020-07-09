@@ -14,23 +14,12 @@
 
 Movement movement;
 
-
-//Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
-
-//float heading = 0;
-//float headingTurnFactor = 0;
-//float headingSetPoint = 0;
-
-//PID headingPID = PID(&heading, &headingTurnFactor, &headingSetPoint, 1, 2, 0, 10);
-
 unsigned long ledTimer = micros();
 unsigned long printTimer = micros();
 unsigned long imuTimer = micros();
 unsigned long stepTimer = micros();
 unsigned long inchTimer = micros();
 unsigned long newTimer = micros();
-
-//adafruit_bno055_offsets_t calibrationData;
 
 String input = "";
 String input2 = "";
@@ -39,6 +28,10 @@ double y = 0;
 Point p0 = Point(x, y);
 Point p1 = Point(10, -5);
 Point p2 = Point(3, 3);
+
+// ROBOT MEASUREMENTS]
+const float RADIUS = 7.75; // wheel radius in mm
+const float LENGTH = 11.5; // wheel base length in mm
 
 //Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
 //Motor rightMotor(14, 15, 6, A8, 38, 39, 4480);
