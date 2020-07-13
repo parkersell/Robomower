@@ -107,7 +107,10 @@ void PurePursuit::compute()
 		// 1. Get the current location of the vehicle.
 		double xPos = *_xPos;
 		double yPos = *_yPos;
-		double phi = *_heading - PI / 2;
+  // HWSERIAL.println(xPos);
+   //HWSERIAL.println(yPos);
+		double phi = *_heading;// - PI / 2;
+    //HWSERIAL.println(*_heading);
 
 		// 2, 3. Find the goal point.
 		computeNextGoalPoint();
@@ -140,6 +143,7 @@ void PurePursuit::compute()
 		// 7. Check for stop condition
 		if (!path.hasNext())
 		{
+    /*
 			// Check for stoping condition
 			int length = path.getLength();
 			float p0x = path.getX(length - 2);
@@ -165,6 +169,11 @@ void PurePursuit::compute()
 				// Serial.println(theta);
 				_stop = true;
 			}
+     */
+    double distance = hypot(xGoalTranslated, yGoalTranslated);
+    if(distance<2){
+      _stop =true;
+      }
 		}
 
 		_prevComputeTime = millis(); 

@@ -21,6 +21,7 @@ class Subscriber {
     double* getXPointer();
     double* getYPointer();
     double* getHeadingPointer();
+    bool tracking();
 
     double getY();
     double getX();

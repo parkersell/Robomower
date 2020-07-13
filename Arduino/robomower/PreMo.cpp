@@ -3,20 +3,20 @@
 #define HWSERIAL Serial1
 
 /*
---------------------------------------------------------------------------------------------
-PATH FOLLOWER CONTROL
---------------------------------------------------------------------------------------------
+  --------------------------------------------------------------------------------------------
+  PATH FOLLOWER CONTROL
+  --------------------------------------------------------------------------------------------
 */
 
 PreMo::PreMo(float radius, float length, double kp, double ki, double kd)
 {
   _deadReckoner = new Subscriber();
   Movement movementP;
-	_moveReverse = false;
-	_motorSpeed = DEFAULT_PATH_FOLLOW_SPEED; // percent
+  _moveReverse = false;
+  _motorSpeed = DEFAULT_PATH_FOLLOW_SPEED; // percent
 
 
-// Init PID
+  // Init PID
   _pid = new PIDv1(&_input, &_output, &_setpoint, kp, ki, kd, DIRECT);
   (*_pid).SetSampleTime(PID_SAMPLE_TIME);
   (*_pid).SetOutputLimits(-PID_MOTOR_OUTPUT_RANGE, PID_MOTOR_OUTPUT_RANGE);
@@ -24,93 +24,102 @@ PreMo::PreMo(float radius, float length, double kp, double ki, double kd)
   _input = 0;
   _output = 0;
   _setpoint = 0;
-  
-	  // Initizlie PurePursuit
+
+  // Initizlie PurePursuit
   _purePursuit = new PurePursuit((*_deadReckoner).getXPointer(),
-          (*_deadReckoner).getYPointer(), (*_deadReckoner).getHeadingPointer(), length);
+                                 (*_deadReckoner).getYPointer(), (*_deadReckoner).getHeadingPointer(), length);
 }
 
 void PreMo::goToDelta(float deltaX, float deltaY)
 {
-	Subscriber& dr = *_deadReckoner;
-	double xr = dr.getX();
-	double yr = dr.getY();
-	float x = xr + deltaX;
-	float y = yr + deltaY;
-	goTo(x, y);
+  Subscriber& dr = *_deadReckoner;
+  double xr = dr.getX();
+  double yr = dr.getY();
+  float x = xr + deltaX;
+  float y = yr + deltaY;
+  goTo(x, y);
 }
 
 void PreMo::goTo(float x, float y)
 {
-  
-	Subscriber& dr = *_deadReckoner;
-	double xr = dr.getX();
-	double yr = dr.getY();
-	float theta = atan2(y - yr, x - xr);
 
-	// Create the path to follow
-	_tempPathX[0] = xr;
-	_tempPathY[0] = yr;
-	_tempPathX[1] = xr + cos(theta);
-	_tempPathY[1] = yr + sin(theta);
-	_tempPathX[2] = x - 2 * cos(theta);
-	_tempPathY[2] = y - 2 * sin(theta);
-	_tempPathX[3] = x - cos(theta);
-	_tempPathY[3] = y - sin(theta);
-	_tempPathX[4] = x;
-	_tempPathY[4] = y;
+  Subscriber& dr = *_deadReckoner;
+  double xr = dr.getX();
+  double yr = dr.getY();
+  float theta = atan2(y - yr, x - xr);
 
-	// Start following path
-	startPathFollowing(_tempPathX, _tempPathY, 5, true, false);
+  // Create the path to follow
+  _tempPathX[0] = xr;
+  _tempPathY[0] = yr;
+
+  /*
+    _tempPathX[1] = xr + cos(theta);
+    _tempPathY[1] = yr + sin(theta);
+    _tempPathX[2] = x - 2 * cos(theta);
+    _tempPathY[2] = y - 2 * sin(theta);
+    _tempPathX[3] = x - cos(theta);
+    _tempPathY[3] = y - sin(theta); */
+  _tempPathX[1] = x;
+  _tempPathY[1] = y;
+  _tempPathX[2] = x;
+  _tempPathY[2] = y;
+  _tempPathX[3] = x;
+  _tempPathY[3] = y;
+
+  _tempPathX[4] = x;
+  _tempPathY[4] = y;
+
+  // Start following path
+  startPathFollowing(_tempPathX, _tempPathY, 5, true, false);
 }
 
 void PreMo::forward(float distance)
 {
-	// Get the current pos and set the path array.
-	double x = (*_deadReckoner).getX();
-	double y = (*_deadReckoner).getY();
-	double heading = (*_deadReckoner).getHeading();
-	_tempPathX[0] = x;
-	_tempPathY[0] = y;
-	_tempPathX[1] = x + distance * 0.01 * cos(heading);
-	_tempPathY[1] = y + distance * 0.01 * sin(heading);
-	_tempPathX[2] = x + distance * 0.99 * cos(heading);
-	_tempPathY[2] = y + distance * 0.99 * sin(heading);
-	_tempPathX[3] = x + distance * cos(heading);
-	_tempPathY[3] = y + distance * sin(heading);
+  // Get the current pos and set the path array.
+  double x = (*_deadReckoner).getX();
+  double y = (*_deadReckoner).getY();
+  double heading = (*_deadReckoner).getHeading();
+  _tempPathX[0] = x;
+  _tempPathY[0] = y;
+  _tempPathX[1] = x + distance * 0.01 * cos(heading);
+  _tempPathY[1] = y + distance * 0.01 * sin(heading);
+  _tempPathX[2] = x + distance * 0.99 * cos(heading);
+  _tempPathY[2] = y + distance * 0.99 * sin(heading);
+  _tempPathX[3] = x + distance * cos(heading);
+  _tempPathY[3] = y + distance * sin(heading);
 
-	// Start path following
-	startPathFollowing(_tempPathX, _tempPathY, 4, true, false);
+  // Start path following
+  startPathFollowing(_tempPathX, _tempPathY, 4, true, false);
 }
 
 void PreMo::reverse(float distance)
 {
-	// Get the current pos.
-	double x = (*_deadReckoner).getX();
-	double y = (*_deadReckoner).getY();
-	double heading = (*_deadReckoner).getHeading();
+  // Get the current pos.
+  double x = (*_deadReckoner).getX();
+  double y = (*_deadReckoner).getY();
+  double heading = (*_deadReckoner).getHeading();
 
-	// Make the straight path
-	_tempPathX[0] = x;
-	_tempPathY[0] = y;
-	_tempPathX[1] = x - distance * 0.01 * cos(heading);
-	_tempPathY[1] = y - distance * 0.01 * sin(heading);
-	_tempPathX[2] = x - distance * 0.99 * cos(heading);
-	_tempPathY[2] = y - distance * 0.99 * sin(heading);
-	_tempPathX[3] = x - distance * cos(heading);
-	_tempPathY[3] = y - distance * sin(heading);
+  // Make the straight path
+  _tempPathX[0] = x;
+  _tempPathY[0] = y;
+  _tempPathX[1] = x - distance * 0.01 * cos(heading);
+  _tempPathY[1] = y - distance * 0.01 * sin(heading);
+  _tempPathX[2] = x - distance * 0.99 * cos(heading);
+  _tempPathY[2] = y - distance * 0.99 * sin(heading);
+  _tempPathX[3] = x - distance * cos(heading);
+  _tempPathY[3] = y - distance * sin(heading);
 
-	// Start path following
-	startPathFollowing(_tempPathX, _tempPathY, 4, false, false);
+  // Start path following
+  startPathFollowing(_tempPathX, _tempPathY, 4, false, false);
 }
 /*
-void PreMo::twistBothMotors(bool twistBothMotors)
-{
+  void PreMo::twistBothMotors(bool twistBothMotors)
+  {
 	_twistBothMotors = twistBothMotors;
-}
+  }
 
-void PreMo::twist(float targetHeading, int direction)
-{
+  void PreMo::twist(float targetHeading, int direction)
+  {
 	targetHeading = targetHeading - 360 * floor(targetHeading / 360);
 
 	double heading = (*_deadReckoner).getHeading()*RAD_TO_DEG;
@@ -134,7 +143,7 @@ void PreMo::twist(float targetHeading, int direction)
 		deltaCCW = delta2;
 		deltaCW = delta1;
 	}
-	
+
 	if (direction == TWIST_CCW)
 	{
 		delta = deltaCCW;
@@ -155,10 +164,10 @@ void PreMo::twist(float targetHeading, int direction)
 	// Serial.print("\tdelta: "); Serial.println(delta);
 
 	twistDelta(delta);
-}
+  }
 
-void PreMo::twistDelta(float angle)
-{
+  void PreMo::twistDelta(float angle)
+  {
 	// Serial.print("angle: "); Serial.println(angle);
 	_setpointMotorLeft = 40; // RPM
 	_setpointMotorRight = 40;
@@ -172,10 +181,10 @@ void PreMo::twistDelta(float angle)
 	_isTwisting = true;
 
 	// Serial.print("target: "); Serial.println(_targetHeading);
-}
+  }
 
-void PreMo::continueTwist()
-{
+  void PreMo::continueTwist()
+  {
 	DeadReckoner& dr = *_deadReckoner;
 	MotorManager& mm = *_motorManager;
 
@@ -219,244 +228,265 @@ void PreMo::continueTwist()
 		// Stop the motors.
 		stop();
 	}
-}
+  }
 */
 void PreMo::transformCoordinate(float* x, float* y, float transformAngle, float translateX, float translateY)
 {
-	float tempX = *x;
-	float tempY = *y;
-	*x = translateX + tempX * cos(transformAngle) + tempY * sin(transformAngle);
-	*y = translateY - tempX * sin(transformAngle) + tempY * cos(transformAngle);
+  float tempX = *x;
+  float tempY = *y;
+  *x = translateX + tempX * cos(transformAngle) + tempY * sin(transformAngle);
+  *y = translateY - tempX * sin(transformAngle) + tempY * cos(transformAngle);
 }
 
 void PreMo::computeCurvePathPoint(float* x, float* y, float theta, float turningRadius, float transformAngle, float isLeftTurn)
 {
-	// Get the current position.
-	double xPos = (*_deadReckoner).getX();
-	double yPos = (*_deadReckoner).getY();
+  // Get the current position.
+  double xPos = (*_deadReckoner).getX();
+  double yPos = (*_deadReckoner).getY();
 
-	theta = isLeftTurn ? theta : -theta;
-	float xip = turningRadius * (cos(theta) - 1);
-	float yip = turningRadius * sin(theta);
+  theta = isLeftTurn ? theta : -theta;
+  float xip = turningRadius * (cos(theta) - 1);
+  float yip = turningRadius * sin(theta);
 
-	transformCoordinate(&xip, &yip, transformAngle, xPos, yPos);
+  transformCoordinate(&xip, &yip, transformAngle, xPos, yPos);
 
-	// Serial.print(xPos); Serial.print("\t");
-	// Serial.print(yPos); Serial.print("\t");
-	// Serial.print(theta); Serial.print("\t");
-	// Serial.print(xip); Serial.print("\t");
-	// Serial.println(yip);
+  // Serial.print(xPos); Serial.print("\t");
+  // Serial.print(yPos); Serial.print("\t");
+  // Serial.print(theta); Serial.print("\t");
+  // Serial.print(xip); Serial.print("\t");
+  // Serial.println(yip);
 
-	*x = xip;
-	*y = yip;
+  *x = xip;
+  *y = yip;
 }
 
 void PreMo::setPIDPathFollowing(float kp, float kd, float ki)
 {
-	(*_pid).SetTunings(kp, ki, kd);
+  (*_pid).SetTunings(kp, ki, kd);
 }
 /*
-void PreMo::setPIDMotor(float kp, float kd, float ki)
-{
+  void PreMo::setPIDMotor(float kp, float kd, float ki)
+  {
 	(*_pidMotorLeft).SetTunings(kp, ki, kd);
 	(*_pidMotorRight).SetTunings(kp, ki, kd);
-}
+  }
 */
 void PreMo::startPathFollowing(float* pathX, float* pathY, int pathLength)
 {
-	startPathFollowing(pathX, pathY, pathLength, true, true);
+  startPathFollowing(pathX, pathY, pathLength, true, true);
 }
 
 void PreMo::startPathFollowing(float* pathX, float* pathY, int pathLength, bool isForward, bool setLocation)
 {
-	HWSERIAL.println("STARTPATHWORKS");
-	// Set starting position to first path location point with robot pointing towards the next point.
-	double x0 = pathX[0];
-	double y0 = pathY[0];
-	double x1 = pathX[1];
-	double y1 = pathY[1];
+  HWSERIAL.println("STARTPATHWORKS");
+  // Set starting position to first path location point with robot pointing towards the next point.
+  double x0 = pathX[0];
+  double y0 = pathY[0];
+  double x1 = pathX[1];
+  double y1 = pathY[1];
 
-	double heading = atan2(y1 - y0, x1 - x0);
+  double heading = atan2(y1 - y0, x1 - x0);
 
-	// Serial.print("x0: "); Serial.print(x0);
-	// Serial.print("\ty0: "); Serial.print(y0);
-	// Serial.print("\tx1: "); Serial.print(x1);
-	// Serial.print("\ty1: "); Serial.print(y1);
-	// Serial.print("\theading: "); Serial.println(heading);
+  // Serial.print("x0: "); Serial.print(x0);
+  // Serial.print("\ty0: "); Serial.print(y0);
+  // Serial.print("\tx1: "); Serial.print(x1);
+  // Serial.print("\ty1: "); Serial.print(y1);
+  // Serial.print("\theading: "); Serial.println(heading);
 
-	// Set the location to the initial coordinates.
-	Subscriber& dr = (*_deadReckoner);
-	// Set the heading to the angle of the vector from the first to the second point.
-	heading = isForward ? heading : heading + PI;
+  // Set the location to the initial coordinates.
+  Subscriber& dr = (*_deadReckoner);
+  // Set the heading to the angle of the vector from the first to the second point.
+  heading = isForward ? heading : heading + PI;
 
-	if (setLocation)
-	{
-		// Set the starting location as the first path point.
-		//dr.setX(x0);
-		//dr.setY(y0);
+  if (setLocation)
+  {
+    // Set the starting location as the first path point.
+    //dr.setX(x0);
+    //dr.setY(y0);
 
-		// Set the heading such that the robot points to the initial direction that the path will follow.
-		//dr.setHeading(heading);
-	}
+    // Set the heading such that the robot points to the initial direction that the path will follow.
+    //dr.setHeading(heading);
+  }
 
-	(*_purePursuit).setPath(pathX, pathY, pathLength);
-	(*_purePursuit).printPath();
+  (*_purePursuit).setPath(pathX, pathY, pathLength);
+  (*_purePursuit).printPath();
 
-	_moveReverse = !isForward;
-	_isFollowingPath = true;
-	(*_purePursuit).start();
-	HWSERIAL.println("PPSTARTS");
-	// TODO Remove
-	// double x = dr.getX();
-	// double y = dr.getY();
-	// double t = dr.getHeading();
-	// Serial.println("DEAD RECKONER SET");
-	// Serial.print("x: "); Serial.print(x);
-	// Serial.print(", y: "); Serial.print(y);
-	// Serial.print(", t: "); Serial.println(t);
+  _moveReverse = !isForward;
+  _isFollowingPath = true;
+  (*_purePursuit).start();
+  HWSERIAL.println("PPSTARTS");
+  // TODO Remove
+  // double x = dr.getX();
+  // double y = dr.getY();
+  // double t = dr.getHeading();
+  // Serial.println("DEAD RECKONER SET");
+  // Serial.print("x: "); Serial.print(x);
+  // Serial.print(", y: "); Serial.print(y);
+  // Serial.print(", t: "); Serial.println(t);
 }
 
 void PreMo::setPathFollowSpeed(int speedPercentage)
 {
-	_motorSpeed = speedPercentage;
+  _motorSpeed = speedPercentage;
 }
 
 void PreMo::stop()
 {
-	_isFollowingPath = false;
-	_isTwisting = false;
-	 movementP.disableM();
+  _isFollowingPath = false;
+  _isTwisting = false;
+  movementP.disableM();
 }
 
 void PreMo::continuePathFollowing()
 {
 
-	(*_purePursuit).compute();
-	// Compute PID
-	_input = (*_purePursuit).getCurvature();
-	  (*_pid).Compute();
+  (*_purePursuit).compute();
+  // Compute PID
+  _input = (*_purePursuit).getCurvature();
+  (*_pid).Compute();
 
-	// Move the robot
-	// Serial.print("output: "); Serial.println(_output);
-   movementP.enableM();
-    moveMotors(_motorSpeed, _output);
-  
+  // Move the robot
+  // Serial.print("output: "); Serial.println(_output);
+  movementP.disableM();
+  // moveMotors(_motorSpeed, _output);
+  moveMotors(_motorSpeed, _input);
 
-	if ((*_purePursuit).checkStop())
-	{
-		_isFollowingPath = false;
-		stop();
-	}
+
+  if ((*_purePursuit).checkStop())
+  {
+    _isFollowingPath = false;
+    stop();
+  }
 }
 
 void PreMo::loop()
 {
-	// Dead reckoning
-	//(*_deadReckoner).computePosition();
+  // Dead reckoning
+  //(*_deadReckoner).computePosition();
   movementP.spinOnceM();
-	if (_isFollowingPath)
-	{
-		continuePathFollowing();
-	}
-	else if (_isTwisting)
-	{
-	//	continueTwist();
-	}
+  if (_isFollowingPath)
+  {
+    continuePathFollowing();
+  }
+  else if (_isTwisting)
+  {
+    //	continueTwist();
+  }
 }
 
 bool PreMo::isFollowingPath()
 {
-	return _isFollowingPath;
+  return _isFollowingPath;
 }
 
 void PreMo::moveMotors(int motorSpeed, double diff)
 {
-	int speedLeft, speedRight;
+  int speedLeft, speedRight;
+  int max = motorSpeed;
+  int min = 5;
 
-	// Set speed negation
-	// pos diff -> turn left
-	// neg diff -> turn right
-	if (diff > 0) {
-		speedLeft = map(diff, 100, 0, 0, motorSpeed);
-		speedRight = motorSpeed;
-    
-	}
-	else {
-		diff = -diff;
-		speedLeft = motorSpeed;
-		speedRight = map(diff, 100, 0, 0, motorSpeed);
-    
-	}
-	if (!_moveReverse)
-	{
-		movementP.setSpeedM(speedLeft,speedRight);
-	}
-	else
-	{
-		
-   movementP.setSpeedM(-speedLeft,-speedRight);
-	}
- movementP.computeM();
+  // Set speed negation
+  // pos diff -> turn left
+  // neg diff -> turn right
+  /*if (diff > 0) {
+  	speedLeft = map(diff, 100, 0, 0, motorSpeed);
+  	speedRight = motorSpeed;
+
+    }
+    else {
+  	diff = -diff;
+  	speedLeft = motorSpeed;
+  	speedRight = map(diff, 100, 0, 0, motorSpeed);
+
+    } */
+
+  double  V = getGoalX() - getX(); //Target Velocity
+
+
+  //Set min and max, allows robot to reverse if overshoot
+    V = movementP.clip(V, -max, max);
+
+  speedLeft = V * ((2 - (11.5 * diff)) / 2) * .5;
+  speedRight = V * ((2 + (11.5 * diff)) / 2) * .5;
+  HWSERIAL.println(diff);
+  //HWSERIAL.println(speedRight);
+
+  if (!_moveReverse)
+  {
+    movementP.setSpeedM(speedLeft, speedRight);
+  }
+  else
+  {
+
+    movementP.setSpeedM(-speedLeft, -speedRight);
+   
+  }
+
+
+
+  movementP.computeM();
 }
 
 double PreMo::getX()
 {
-	return (*_deadReckoner).getX();
+  return (*_deadReckoner).getX();
 }
 
 void PreMo::setX(double x)
 {
-	//*_deadReckoner).setX(x);
+  //*_deadReckoner).setX(x);
 }
 
 double PreMo::getY()
 {
-	return (*_deadReckoner).getY();
+  return (*_deadReckoner).getY();
 }
 
 void PreMo::setY(double y)
 {
-	//(*_deadReckoner).setY(y);
+  //(*_deadReckoner).setY(y);
 }
 
 double PreMo::getGoalX()
 {
-	return (*_purePursuit).getGoalX();
+  return (*_purePursuit).getGoalX();
 }
 double PreMo::getGoalY()
 {
-	return (*_purePursuit).getGoalY();
+  return (*_purePursuit).getGoalY();
 }
 double PreMo::getHeading()
 {
-	return (*_deadReckoner).getHeading();
+  return (*_deadReckoner).getHeading();
 }
 
 float* PreMo::getLocationData()
 {
-	static float data[5];
-	PurePursuit pp = (*_purePursuit);
-	Subscriber dr = (*_deadReckoner);
-	data[0] = dr.getX();
-	data[1] = dr.getY();
-	data[2] = dr.getHeading();
-	data[3] = pp.getGoalX();
-	data[4] = pp.getGoalY();
-	return data;
+  static float data[5];
+  PurePursuit pp = (*_purePursuit);
+  Subscriber dr = (*_deadReckoner);
+  data[0] = dr.getX();
+  data[1] = dr.getY();
+  data[2] = dr.getHeading();
+  data[3] = pp.getGoalX();
+  data[4] = pp.getGoalY();
+  HWSERIAL.println(data[3]);
+  HWSERIAL.println(data[4]);
+  return data;
 }
 
 double PreMo::getOutput()
 {
-	return _output;
+  return _output;
 }
 
 void PreMo::printPath()
 {
-	(*_purePursuit).printPath();
+  (*_purePursuit).printPath();
 }
 
 void PreMo::reset()
 {
-	//(*_deadReckoner).reset();
-	stop();
+  //(*_deadReckoner).reset();
+  stop();
 }

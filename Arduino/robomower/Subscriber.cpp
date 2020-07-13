@@ -1,7 +1,8 @@
 #include "Arduino.h"
 #include "Subscriber.h"
 #include <math.h>
-
+#define USE_TEENSY_HW_SERIAL
+#define HWSERIAL Serial1
 
 
 Subscriber::Subscriber():  pose_subscriber("/orb_slam2_rgbd/pose", &positionCallback, this)
@@ -19,6 +20,10 @@ double pancakes = 0;//y
 double syrup = 0; //z
 double heading = 0;
 
+unsigned long settTimer = millis();
+unsigned long trackTimer = millis();
+double oldtoast = 0;
+double oldeggs = 0;
 
 
 void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
@@ -30,6 +35,24 @@ void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
   pancakes = pos.pose.orientation.y;
   syrup = pos.pose.orientation.z;
   heading = getYaw();
+}
+bool Subscriber::tracking() {
+ /* if (millis() - settTimer > 200) {
+    oldtoast = toast;
+    oldeggs = eggs;
+    settTimer = millis();
+  }
+    if (abs(oldtoast - toast) == 0 && abs(oldeggs - eggs) == 0) {
+      trackTimer = millis();
+      }
+
+    if (abs(oldtoast - toast) == 0 && abs(oldeggs - eggs) == 0  && (millis()-trackTimer > 2000)) {
+      return false;
+    }
+    else {
+      return true;
+    }
+  */
 }
 
 Point Subscriber::getPosition() {
@@ -59,7 +82,7 @@ double* Subscriber::getYPointer() {
   return &eggs;
 }
 double* Subscriber::getHeadingPointer() {
- 
+
   return &heading;
 }
 double Subscriber::getX() {

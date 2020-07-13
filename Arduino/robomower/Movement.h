@@ -9,7 +9,7 @@ class Movement {
     Movement();
     
     
-    void goToPosition(Point, double, double, double);
+    void goToPosition(Point, double, double);
     void mowLawn(double, Point, Point, Point, Point);
     void disableM();
     void enableM();
@@ -19,13 +19,13 @@ class Movement {
     void initRobot();
     void spinOnceM();
     Point getPosition();
-
+    float clip(float, float, float);
    
 
   private:
     inline double to_radians(double);
     inline double to_degrees(double);
-    float clip(float, float, float);
+    
     
 
 

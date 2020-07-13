@@ -69,7 +69,7 @@ float Movement::clip(float n, float lower, float upper) {
   return  n <= lower ? lower : n >= upper ? upper : n;
 }
 
-void Movement::goToPosition(Point p2, double headingtarget, double rpm, double maxerror) {
+void Movement::goToPosition(Point p2, double rpm, double maxerror) {
   Point p1  = subscriber.getPosition();
 
   double leftpower = 0;
@@ -79,12 +79,18 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
   double ypose = p1.y;
   double theta = subscriber.getYaw();
 
+
   double xtarget = p2.x;
   double ytarget = p2.y;
+
 
   double xdistance = xtarget - xpose; //Difference between target x and actual x
   double ydistance = ytarget - ypose; //Difference between target y and actual y
   double distance = hypot(xdistance, ydistance);
+
+  double heading = atan2(ydistance, xdistance);
+  heading = to_degrees(heading);
+
   String input2 = "";
 
   while (distance > maxerror) {
@@ -100,6 +106,9 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
         } else if (input2 == 'e') {
           enableM();
         }
+        else if (input2 == 'z') {
+          break;
+        }
         input2 = "";
 
       } else input2 += temp;
@@ -111,35 +120,36 @@ void Movement::goToPosition(Point p2, double headingtarget, double rpm, double m
     xpose = p1.x;
     ypose = p1.y;
 
-    distance = hypot(xdistance, ydistance);
     xdistance = xtarget - xpose; //Difference between target x and actual x
     ydistance = ytarget - ypose; //Difference between target y and actual y
-    Serial1.print("x: ");
-    Serial1.println(xdistance);
-    Serial1.print("y: ");
-    Serial1.println(ydistance);
-    Serial1.print("dist: ");
-    Serial1.println(distance);
-    Serial1.print("theta: ");
-    Serial1.println(theta);
+    distance = hypot(xdistance, ydistance);
+    heading = atan2(ydistance, xdistance);
+    heading = to_degrees(heading);
+    /*
+      Serial1.print("x: ");
+      Serial1.println(xdistance);
+      Serial1.print("y: ");
+      Serial1.println(ydistance);
+      Serial1.print("dist: ");
+      Serial1.println(distance);
+      Serial1.print("theta: ");
+      Serial1.println(theta);
+    */
 
 
-    double xcorrect = clip(xdistance, -rpm, rpm);
-    double ycorrect = clip(ydistance, -rpm, rpm);
-    double angleCorrection = headingtarget - theta;
-    double yangleCorrection = -90 - theta;
-    double kp = .5;
+    double dcorrect = distance * 2.5;
+    dcorrect = clip(dcorrect, -rpm, rpm);
+    double angleCorrection = heading - theta;
+    //Serial1.println(angleCorrection);
+    double kp = .75;
+    double rightpower = dcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
+    double leftpower = dcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
 
-    if (ydistance > maxerror) {
-      rightpower = -ycorrect * (cos(to_radians(yangleCorrection)) + kp * sin(to_radians(yangleCorrection)));
-      leftpower = -ycorrect * (cos(to_radians(yangleCorrection)) - kp * sin(to_radians(yangleCorrection)));
-    }
+    //Serial1.print("leftpower:");
+    //Serial1.println(leftpower);
+    //Serial1.print("rightpower:");
+    Serial1.println((cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection))));
 
-    else {
-      rightpower = xcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
-      leftpower = xcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
-
-    }
     setSpeedM(leftpower, rightpower);
     computeM();
   }
@@ -172,10 +182,10 @@ void Movement::mowLawn(double heading, Point topleft, Point topright, Point bott
   //assume start in bottom left corner
 
 
-  goToPosition(bottomright, 90, 20, 1);
-  goToPosition(topright, 0, 20, 1);
-  goToPosition(topleft, 270, 20, 1);
-  goToPosition(bottomleft, 0, 20, 1);
+  goToPosition(bottomright, 20, 1);
+  goToPosition(topright, 20, 1);
+  goToPosition(topleft, 20, 1);
+  goToPosition(bottomleft, 20, 1);
 
 
   topleft = Point(topleft.x - 5, topleft.y + 5);
