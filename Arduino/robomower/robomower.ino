@@ -5,7 +5,7 @@
 #include "Movement.h"
 #include "Point.h"
 
-#include "PreMo.h"
+
 
 
 
@@ -18,6 +18,7 @@
 Movement movement;
 Subscriber sub;
 
+
 unsigned long ledTimer = micros();
 unsigned long printTimer = micros();
 unsigned long imuTimer = micros();
@@ -25,42 +26,38 @@ unsigned long stepTimer = micros();
 unsigned long inchTimer = micros();
 unsigned long newTimer = micros();
 
+
 String input = "";
 String input2 = "";
 double x = 0;
 double y = 0;
 Point p0 = Point(x, y);
-Point p1 = Point(30, -15);
-Point p2 = Point(40, -15);
-Point h1 = Point(50, -4);
-Point h2 = Point(52, -14);
-Point h3 = Point(60, -40);
-Point h4 = Point(71, -100);
-Point h5 = Point(81, -103);
-
-// PID TUNING
-// PID for path following (for turning when followiung path)
-const double KP = 50;
-const double KI = 0;
-const double KD = 1;
-
-// ROBOT MEASUREMENTS]
-const float RADIUS = 7.75; // wheel radius in mm
-const float LENGTH = 20; // wheel base length in mm //11.5
+Point p1 = Point(20, 0);
+Point p2 = Point(30, 0);
 
 
-// PATH FOLLOWING SPEED
-// Target speed of path following in percentage.
-const int PATH_FOLLOW_SPEED = 20;
+/*
+  // PID TUNING
+  // PID for path following (for turning when followiung path)
+  const double KP = 50;
+  const double KI = 0;
+  const double KD = 1;
 
-PreMo premo(RADIUS, LENGTH, KP, KI, KD);
+  // ROBOT MEASUREMENTS]
+  const float RADIUS = 7.75; // wheel radius in mm
+  const float LENGTH = 20; // wheel base length in mm //11.5
 
-//Motor leftMotor(33, 34, 7, A9, 36, 37, 4480);
-//Motor rightMotor(14, 15, 6, A8, 38, 39, 4480);
+
+  // PATH FOLLOWING SPEED
+  // Target speed of path following in percentage.
+  const int PATH_FOLLOW_SPEED = 20;
+
+  PreMo premo(RADIUS, LENGTH, KP, KI, KD);
+*/
 
 void setup() {
 
-  premo.setPathFollowSpeed(PATH_FOLLOW_SPEED);
+  //premo.setPathFollowSpeed(PATH_FOLLOW_SPEED);
 
   // put your setup code here, to run once:
   //Serial1.begin(115200);
@@ -72,7 +69,7 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 
-  premo.loop();
+  //  premo.loop();
   while (HWSERIAL.available()) {
 
     char temp = HWSERIAL.read();
@@ -80,8 +77,10 @@ void loop() {
     //Serial.println("hi");
     if (temp == '\n') {
       if (input2 == 'd') {
-        premo.reset();
+        // premo.reset();
         movement.disableM();
+        movement.disableGrass();
+
 
       } else if (input2 == 'e') {
 
@@ -91,48 +90,16 @@ void loop() {
 
 
       else if (input2 == 'x') {
-        movement.goToPosition(p1, 40, 2);
-        movement.goToPosition(p2, 40, 2);
+        movement.goToPosition(p1, 20, 2);
+         movement.goToPosition(p2, 40, 2);
 
       }
-      else if (input2 == 'y') {
-        movement.goToPosition(h1, 20, 2);
-        Serial1.println("H1 Done");
-        movement.goToPosition(h2, 20, 2);
-        Serial1.println("H2 Done");
-         movement.goToPosition(h3, 20, 2);
-        Serial1.println("H3 Done");
-         movement.goToPosition(h4, 20, 2);
-        Serial1.println("H4 Done");
-
+      else if (input2 == 'g') {
+        movement.enableGrass();
       }
 
-      else if (input2 == 'u') {
-        movement.goToPosition(h2, 20, 2);
-        Serial1.println("H2 Done");
-
-      }
-
-      else if (input2 == 'i') {
-        movement.goToPosition(h3, 20, 2);
-        Serial1.println("H3 Done");
-
-      }
-
-      else if (input2 == 'o') {
-        movement.goToPosition(h4, 20, 2);
-        Serial1.println("H4 Done");
-      }
-      else if (input2 == 'p') {
-        premo.goTo(10, 0);
-
-      }
-      else if (input2 == 'f') {
-        premo.forward(10);
-
-      }
-      else if (input2 == 'r') {
-        premo.reverse(10);
+      else if (input2 == 'h') {
+        movement.disableGrass();
 
       }
 
@@ -161,9 +128,6 @@ void loop() {
         //        headingSetPoint = speed;
         float turn = commaIndex == -1 ? 0 : input2.substring(commaIndex + 1).toFloat();
         movement.setSpeedM(speed + turn, speed - turn);
-
-
-
       }
       input2 = "";
     } else input2 += temp;
@@ -175,29 +139,31 @@ void loop() {
 
 
     Point point = movement.getPosition();
-    //Serial.println(micros() - inchTimer);
+    double laser = sub.getLaser();
+
     HWSERIAL.println(point.x);
     HWSERIAL.println(point.y);
+    HWSERIAL.println(laser);
     //HWSERIAL.print("yaw");
     //HWSERIAL.println(sub.getYaw());
 
     //premo.getLocationData();
+   // sub.tracking();
+    
+         if(sub.tracking()){
+            HWSERIAL.println("true");
+          }
+          else {
+            HWSERIAL.println("false");
+          } 
 
 
-    /*  if(sub.tracking()){
-        HWSERIAL.println("true");
-      }
-      else {
-        HWSERIAL.println("false");
-      }*/
 
-
-    //HWSERIAL.println(*h);
     //  premo.printPath();
     // movement.spinOnceM();
     //movement.enableM();
     //movement.goToPosition(0, p1, 0, 10, 1);
-    //  Serial.println(movement.getSpeedM());
+
 
 
     printTimer = micros();
@@ -212,5 +178,6 @@ void loop() {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
 
+  
   movement.computeM();
 }

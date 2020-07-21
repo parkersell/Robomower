@@ -7,6 +7,7 @@ class Hardware {
     Hardware();
     Motor leftMotor;
     Motor rightMotor;
+    Motor grassMotor;
   private:
   
   

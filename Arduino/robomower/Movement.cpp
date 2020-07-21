@@ -36,6 +36,15 @@ void Movement::enableM() {
   hardware.rightMotor.enable();
 }
 
+void Movement::enableGrass(){
+  hardware.grassMotor.enable();
+  hardware.grassMotor.setSpeed(100);
+  }
+
+void Movement::disableGrass(){
+  hardware.grassMotor.disable();
+  }
+
 void Movement::disableM() {
   hardware.leftMotor.disable();
   hardware.rightMotor.disable();
@@ -49,6 +58,8 @@ void Movement::setSpeedM(int leftpower, int rightpower) {
 void Movement::computeM() {
   hardware.leftMotor.compute();
   hardware.rightMotor.compute();
+  hardware.grassMotor.setCurrentLimit(25);
+  hardware.grassMotor.compute();
 }
 
 
@@ -68,6 +79,8 @@ inline double Movement::to_degrees(double radians) {
 float Movement::clip(float n, float lower, float upper) {
   return  n <= lower ? lower : n >= upper ? upper : n;
 }
+
+
 
 void Movement::goToPosition(Point p2, double rpm, double maxerror) {
   Point p1  = subscriber.getPosition();
@@ -90,7 +103,6 @@ void Movement::goToPosition(Point p2, double rpm, double maxerror) {
 
   double heading = atan2(ydistance, xdistance);
   heading = to_degrees(heading);
-
   String input2 = "";
 
   while (distance > maxerror) {
@@ -113,7 +125,7 @@ void Movement::goToPosition(Point p2, double rpm, double maxerror) {
 
       } else input2 += temp;
     }
-
+    float laser = subscriber.getLaser();
     spinOnceM();
     p1  = subscriber.getPosition();
     theta = subscriber.getYaw();
@@ -125,16 +137,18 @@ void Movement::goToPosition(Point p2, double rpm, double maxerror) {
     distance = hypot(xdistance, ydistance);
     heading = atan2(ydistance, xdistance);
     heading = to_degrees(heading);
-    /*
-      Serial1.print("x: ");
-      Serial1.println(xdistance);
-      Serial1.print("y: ");
-      Serial1.println(ydistance);
-      Serial1.print("dist: ");
-      Serial1.println(distance);
-      Serial1.print("theta: ");
-      Serial1.println(theta);
-    */
+
+    Serial1.print("x: ");
+    Serial1.println(xdistance);
+    Serial1.print("y: ");
+    Serial1.println(ydistance);
+    Serial1.print("dist: ");
+    Serial1.println(distance);
+    Serial1.print("theta: ");
+    Serial1.println(theta);
+    Serial1.print("laser: ");
+    Serial1.println(laser);
+
 
 
     double dcorrect = distance * 2.5;
@@ -142,13 +156,25 @@ void Movement::goToPosition(Point p2, double rpm, double maxerror) {
     double angleCorrection = heading - theta;
     //Serial1.println(angleCorrection);
     double kp = .75;
-    double rightpower = dcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
-    double leftpower = dcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
 
+    if (isnan(laser)) {
+      rightpower = 0;
+      leftpower = 0;
+    }
+
+    else if(!subscriber.tracking){
+      rightpower = -5;
+      leftpower = 5;
+      }
+      
+    else {
+      rightpower = dcorrect * (cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection)));
+      leftpower = dcorrect * (cos(to_radians(angleCorrection)) - kp * sin(to_radians(angleCorrection)));
+    }
     //Serial1.print("leftpower:");
     //Serial1.println(leftpower);
     //Serial1.print("rightpower:");
-    Serial1.println((cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection))));
+    //Serial1.println((cos(to_radians(angleCorrection)) + kp * sin(to_radians(angleCorrection))));
 
     setSpeedM(leftpower, rightpower);
     computeM();

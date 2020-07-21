@@ -13,6 +13,8 @@ class Movement {
     void mowLawn(double, Point, Point, Point, Point);
     void disableM();
     void enableM();
+     void disableGrass();
+    void enableGrass();
     void computeM();
     void setSpeedM(int, int);
     float getSpeedM();

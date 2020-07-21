@@ -5,11 +5,15 @@
 #define HWSERIAL Serial1
 
 
-Subscriber::Subscriber():  pose_subscriber("/orb_slam2_rgbd/pose", &positionCallback, this)
+Subscriber::Subscriber():  pose_subscriber("/orb_slam2_rgbd/pose", &positionCallback, this), laser_subscriber("/distance", &laserCallback, this)
 {}
+
 ros::NodeHandle nh;
+
 geometry_msgs::PoseStamped pos;
 geometry_msgs::Pose p;
+std_msgs::Float32 msg;
+
 std_msgs::String cmd;
 double toast = 0; //x
 double eggs = 0; //y
@@ -20,10 +24,13 @@ double pancakes = 0;//y
 double syrup = 0; //z
 double heading = 0;
 
+float scandistance = 0;
+
 unsigned long settTimer = millis();
 unsigned long trackTimer = millis();
 double oldtoast = 0;
 double oldeggs = 0;
+boolean state;
 
 
 void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
@@ -37,24 +44,48 @@ void Subscriber::positionCallback(const geometry_msgs::PoseStamped& pos) {
   heading = getYaw();
 }
 bool Subscriber::tracking() {
- /* if (millis() - settTimer > 200) {
-    oldtoast = toast;
-    oldeggs = eggs;
-    settTimer = millis();
-  }
-    if (abs(oldtoast - toast) == 0 && abs(oldeggs - eggs) == 0) {
-      trackTimer = millis();
-      }
 
-    if (abs(oldtoast - toast) == 0 && abs(oldeggs - eggs) == 0  && (millis()-trackTimer > 2000)) {
-      return false;
+  if (millis() - settTimer > 500) {
+    if (oldtoast == toast && oldeggs == eggs) {
+      state = false;
+       //HWSERIAL.println("false");
     }
     else {
-      return true;
+      oldtoast = toast;
+      oldeggs = eggs;
+      state = true;
+      // HWSERIAL.println("true");
     }
-  */
+    settTimer = millis();
+    return state;
+  }
+  else {
+   return state;
+  }
+
 }
 
+
+void Subscriber::laserCallback(const std_msgs::Float32& msg) {
+
+  //scandistance = 39.37 * (msg.ranges[360]);
+    scandistance = msg.data;
+  /*
+    float[] regions = {
+    39.37 * min(msg.ranges[0:143]),
+    39.37 * min(msg.ranges[144:287]),
+    39.37 * min(msg.ranges[288:431]),
+    39.37 * min(msg.ranges[432:575]),
+    39.37 * min(msg.ranges[576:713]),
+
+    }*/
+  //rospy.loginfo(regions)
+}
+
+double Subscriber::getLaser() {
+  double laser = scandistance;
+  return laser;
+}
 Point Subscriber::getPosition() {
   Point location = Point(toast, eggs);
   return location;
@@ -98,7 +129,8 @@ double Subscriber::getHeading() {
 }
 void Subscriber::initSLAM() {
   nh.initNode();
-  nh.subscribe(pose_subscriber);
+ nh.subscribe(pose_subscriber);
+nh.subscribe(laser_subscriber);
 
 }
 
