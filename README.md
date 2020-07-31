@@ -33,9 +33,10 @@ We have also considered using these systems (found later in the project, and not
 
 **Catkin Workspace**: catkin_ws
 - There are other workspaces in home that we no longer use 
+- Must use catkin_make -j2 to only use 2 cores when making, otherwise Pi will crash at 99% :)
 
 **Pi will not Boot unless Program mode is enabled on Teensey or the serial wires are disconnected from the Pi** 
-- This is because the Teensey sends junk because the serial console is not disable 
+- This is because the Teensey sends junk because the serial console is not disabled
 
 Important Links:
 -
@@ -115,6 +116,7 @@ Arduino Code:
 
 **Subscriber.cpp**
 - Used to subscribe to rostopics on the Pi
+- Have fun with the breakfast foods :)
 
 **Point.h**
 - Used to create a x and y point with Point p = Point(x,y);
