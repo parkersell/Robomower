@@ -216,15 +216,15 @@ void Movement::goToPosition(Point p2, double rpm, double maxerror) {
 
 }
 
-void Movement::turnTo(double theta, int maxerror, double kp) {
+void Movement::turnTo(double theta, int maxerror, double max) {
   double firstimuyaw = getIMUM();
   double target = int(theta + 360) % 360;
   double imuyaw = int(firstimuyaw + 360) % 360;
-
+  double kp = .2;
   double firstangleDiff = imuyaw - target;
 
   double power = firstangleDiff * kp; //Power proportional to angledifference
-  power = clip(power, -7.5, 7.5); //Set max and min
+  power = clip(power, -max, max); //Set max and min
 
   double rightpower;
   double leftpower;
@@ -361,24 +361,44 @@ void Movement::curveTo(boolean left, int maxerror) {
   setSpeedM(0, 0);
   computeM();
 }
+
+void Movement::mowCalibrate(Point bottomright, Point topright, Point topleft, Point bottomleft, int rpm) {
+
+  //  goToPosition(bottomright, rpm, 2);
+  
+    goToPosition(topright, rpm, 2);
+    turnTo(90, 4, 4);
+
+    goToPosition(topleft, rpm, 2);
+    turnTo(180, 4, 4);
+
+    goToPosition(bottomleft, rpm, 2);
+    turnTo(270, 4, 4);
+    goToPosition(bottomright, rpm, 2);
+    turnTo(0, 4, 4);
+
+  disableM();
+
+}
+
 void Movement::mowLawn(Point bottomright, Point topright, Point topleft, Point bottomleft, int rpm) {
 
   //  goToPosition(bottomright, rpm, 2);
-
+  
   while (topright.y <= topleft.y || bottomright.y <= bottomleft.y || bottomleft.x <= topleft.x || bottomright.x <= topright.x) {
     goToPosition(topright, rpm, 2);
-    turnTo(90, 4, .2);
+    turnTo(90, 4, 7,5);
 
     goToPosition(topleft, rpm, 2);
-    turnTo(180, 4, .2);
+    turnTo(180, 4, 7.5);
 
     goToPosition(bottomleft, rpm, 2);
-    turnTo(270, 4, .2);
+    turnTo(270, 4, 7.5);
     goToPosition(bottomright, rpm, 2);
-    turnTo(0, 4, .2);
+    turnTo(0, 4, 7,5);
 
     topleft = Point(topleft.x - 8, topleft.y - 8);
-    topright = Point(topright.x - 8, topright.y + 9);
+    topright = Point(topright.x - 8, topright.y + 8);
     bottomright = Point(bottomright.x + 8, bottomright.y + 8);
     bottomleft = Point(bottomleft.x + 8, bottomleft.y - 8);
   }

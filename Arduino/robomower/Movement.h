@@ -11,6 +11,7 @@ class Movement {
     //Movement functions
     void goToPosition(Point, double, double);
     void mowLawn(Point, Point, Point, Point, int);
+    void mowCalibrate(Point, Point, Point, Point, int);
     void turnTo(double, int, double);
     void curveTo(boolean, int);
     void sTurn(Point, Point, int);

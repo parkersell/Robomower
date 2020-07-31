@@ -66,9 +66,12 @@ void loop() {
       else if (input2 == 'x') {
         //movement.goToPosition(p1, 40, 2);
         movement.goToPosition(p2, 40, 2);
+      }
+      else if (input2 == 'c') {
+        movement.mowCalibrate(s1, s2, s3, s4, 7.5);
       } 
       else if (input2 == 't') {
-        movement.turnTo(90, 2, .2);
+        movement.turnTo(90, 2, 7.5);
       } 
       else if (input2 == 'r') {
         movement.resetIMUM(); //Reset IMU
@@ -98,12 +101,7 @@ void loop() {
       else if (input2 == 'h') {
         movement.disableGrass();
       } 
-      else if (input2 == 'c') {
-        movement.curveTo(true,3);
-      }
-      else if (input2 == 'v') {
-        movement.curveTo(false,3);
-      }
+      
       else {
         int commaIndex = input2.indexOf(',');
         float speed = commaIndex == -1 ? input2.toFloat() : input2.substring(0, commaIndex).toFloat();
