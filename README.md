@@ -36,7 +36,9 @@ We have also considered using these systems (found later in the project, and not
 
 **Important Links**:
 https://github.com/appliedAI-Initiative/orb_slam_2_ros
+
 http://wiki.ros.org/navigation/Tutorials/RobotSetup
+
 http://cpp.sh/9ha24 Shell to run goToPosition command
 
 **Important Terminal Commands**:
