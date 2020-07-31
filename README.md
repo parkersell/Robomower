@@ -26,12 +26,12 @@ We have also considered using these systems (found later in the project, and not
 - https://www.slamcore.com/products/software/ (not open source, but submitted early access form and were sent a questionnaire that we thought would be better to get further into development before submitting https://docs.google.com/forms/d/e/1FAIpQLSe-EvLTtv4Z5yiWVUd43EQ79LjG3PsoDuYCQ7mr8rROyb5-KQ/viewform)
 
 
-Tej and Parker's Update
+**Tej and Parker's Update**
 
-Unix Password: “ “(it’s one space)
+**Unix Password**: “ “(it’s one space)
 - Password to get into the computer
 
-Important Terminal Commands:
+**Important Terminal Commands**:
 Realsense Camera: roslaunch realsense2_camera rs_rgbdwide.launch infra_fps:=15
 - Launches Realsense camera node for d435 and 848x480 resolution, outputs infra1, infra2, and depth
 
@@ -50,7 +50,7 @@ Depth Image to Laserscan: roslaunch orb_slam2_ros depthscan.launch
 Programming Arduino on PI: Click the Arduino IDE icon on the Desktop
 - Ros.h errors when programming on Windows, thus we compiled the arduino code on the raspberry pi 
 
-Useful Stuff:
+**Useful Stuff**:
 Image Viewer: rosrun rqt_image_view rqt_image_view
 - Visualizes any published ROS image topics
 
@@ -68,7 +68,7 @@ Overclocked: the pi is overclocked at 2GHz
 - This means it could overheat and that's why we display the degrees in Celsius in the top right corner. There is a decimal after the first two integers. For example, with 45277 as the number, it is really 45.277 degrees Celsius. 
 - This can be changed in /boot/firmware/usercfg.txt which inherits the config.txt file and keeps it separate for ubuntu’s sake. 
 
-Stuff that you probably won’t need:
+**Stuff that you probably won’t need**:
 Kinect Camera: roslaunch freenect_launch freenect.launch
 - Launches kinect camera node
 - Kinect requires power wires to connect to 12V power source
@@ -79,7 +79,7 @@ Kinect Orb Slam: roslaunch orb_slam2_ros kinect.launch
 Webcam launch + Orbslam: roslaunch orb_slam2_ros life.launch
 - Launches Monocular camera and ORBSlam
 
-Arduino Code Explained:
+**Arduino Code Explained**:
 
 
 
