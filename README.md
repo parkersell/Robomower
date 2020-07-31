@@ -31,6 +31,14 @@ We have also considered using these systems (found later in the project, and not
 **Unix Password**: “ “(it’s one space)
 - Password to get into the computer
 
+**Catkin Workspace**: catkin_ws
+- There are other workspaces in home that we no longer use 
+
+**Important Links**:
+https://github.com/appliedAI-Initiative/orb_slam_2_ros
+http://wiki.ros.org/navigation/Tutorials/RobotSetup
+http://cpp.sh/9ha24 Shell to run goToPosition command
+
 **Important Terminal Commands**:
 
 Realsense Camera: roslaunch realsense2_camera rs_rgbdwide.launch infra_fps:=15
@@ -82,7 +90,34 @@ Kinect Orb Slam: roslaunch orb_slam2_ros kinect.launch
 Webcam launch + Orbslam: roslaunch orb_slam2_ros life.launch
 - Launches Monocular camera and ORBSlam
 
-**Arduino Code Explained**:
+RTabMap
+- 
+**Arduino Code**:
+
+Hardware.cpp
+- Used to initialize Motors from Motor.h
+
+Movement.cpp
+- Documentation found in the Movement.h file
+
+Subscriber.cpp
+- Used to subscribe to rostopics on the Pi
+
+Point.h 
+- Used to create a x and y point with Point p = Point(x,y);
+
+PID and Motor was perfected when we got it
+
+
+**Future Improvements**:
+- Increase OrbSlam2 debug_image frame rate and accuracy
+- Implement Dynamic Path Planning with things like Navigation Stack's costmap and movebase
+- https://arxiv.org/pdf/1811.08414.pdf On page 5 there is a nice diagram of a solution to dynamic path planning
+- http://wiki.ros.org/navigation/Tutorials/RobotSetup We followed this tutorial and put our code in robomower_2dnav but didn't get the chance to implement it with d435
+- https://answers.ros.org/question/317419/realsense-d435-rtabmap-pixhawk-imu-robot_localization/?answer=318026#post-id-318026 Consider fusing IMU data and Wheel Encoder data with SLAM data to create more accurate and robust localization 
+- http://wiki.ros.org/rtabmap_ros/Tutorials/RemoteMapping Consider sending sensor data over WiFi to another laptop or computer with ROS that then computes, maps, and sends velocity commands back to the Pi. This would allow for more advanced computations
+
+
 
 
 
