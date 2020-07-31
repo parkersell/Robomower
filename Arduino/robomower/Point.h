@@ -7,13 +7,6 @@ struct Point {
     this->x = a;
     this->y = b;
   }
-
- 
 };
-
- 
-
-
-
 
 #endif

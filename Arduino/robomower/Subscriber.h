@@ -4,33 +4,42 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/LaserScan.h>
+#include <nav_msgs/Odometry.h>
+#include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
 #include "Point.h"
+#include <Adafruit_BNO055.h>
+#include <Adafruit_Sensor.h>
 
 class Subscriber {
   public:
     Subscriber();
+
+    //Subscribers
     ros::Subscriber<geometry_msgs::PoseStamped, Subscriber> pose_subscriber;
     ros::Subscriber<std_msgs::Float32, Subscriber> laser_subscriber;
-    static constexpr float RAD_PER_SEC_TO_RPM = 30.0 / PI;
-
     void laserCallback(const std_msgs::Float32&);
     void positionCallback(const geometry_msgs::PoseStamped&);
+
+    //gets
     Point getPosition();
+    double getLaser();
     double getRoll();
     double getYaw();
-    double getLaser();
+
+    //SLAM
     void initSLAM();
     void spinOnceS();
-    double* getXPointer();
-    double* getYPointer();
-    double* getHeadingPointer();
     bool tracking();
 
-    double getY();
-    double getX();
-    double getHeading();
+   //IMU
+   Adafruit_BNO055 bno;
+    void setupIMU();
+    double getIMU();
+    void resetIMU();
+    void sendIMU();
+    double constrainAngle(double);
 
   private:
     inline double to_degrees(double radians) {

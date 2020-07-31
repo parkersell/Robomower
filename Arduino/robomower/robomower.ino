@@ -1,23 +1,15 @@
 #define USE_TEENSY_HW_SERIAL
 #define HWSERIAL Serial1
 
-
 #include "Movement.h"
+
 #include "Point.h"
-
-
-
-
-
-//#include <Adafruit_BNO055.h>
-//#include <Adafruit_Sensor.h>
+//
 
 //#include <EEPROM.h>
 
-
 Movement movement;
 Subscriber sub;
-
 
 unsigned long ledTimer = micros();
 unsigned long printTimer = micros();
@@ -25,7 +17,6 @@ unsigned long imuTimer = micros();
 unsigned long stepTimer = micros();
 unsigned long inchTimer = micros();
 unsigned long newTimer = micros();
-
 
 String input = "";
 String input2 = "";
@@ -35,29 +26,15 @@ Point p0 = Point(x, y);
 Point p1 = Point(20, 0);
 Point p2 = Point(30, 0);
 
+Point s1 = Point(0, 0);
+Point s2 = Point(30, 0);
+Point s3 = Point(30, 30);
+Point s4 = Point(0, 30);
 
-/*
-  // PID TUNING
-  // PID for path following (for turning when followiung path)
-  const double KP = 50;
-  const double KI = 0;
-  const double KD = 1;
-
-  // ROBOT MEASUREMENTS]
-  const float RADIUS = 7.75; // wheel radius in mm
-  const float LENGTH = 20; // wheel base length in mm //11.5
-
-
-  // PATH FOLLOWING SPEED
-  // Target speed of path following in percentage.
-  const int PATH_FOLLOW_SPEED = 20;
-
-  PreMo premo(RADIUS, LENGTH, KP, KI, KD);
-*/
+Point t1 = Point(0, 0);
+Point t2 = Point(30, 20);
 
 void setup() {
-
-  //premo.setPathFollowSpeed(PATH_FOLLOW_SPEED);
 
   // put your setup code here, to run once:
   //Serial1.begin(115200);
@@ -68,8 +45,8 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
+  // sub.sendIMU(); //Uncomment for IMU topic
 
-  //  premo.loop();
   while (HWSERIAL.available()) {
 
     char temp = HWSERIAL.read();
@@ -79,50 +56,55 @@ void loop() {
       if (input2 == 'd') {
         // premo.reset();
         movement.disableM();
+
         movement.disableGrass();
 
-
-      } else if (input2 == 'e') {
-
+      } 
+      else if (input2 == 'e') {
         movement.enableM();
-
-      }
-
-
+      } 
       else if (input2 == 'x') {
-        movement.goToPosition(p1, 20, 2);
-         movement.goToPosition(p2, 40, 2);
+        //movement.goToPosition(p1, 40, 2);
+        movement.goToPosition(p2, 40, 2);
+      } 
+      else if (input2 == 't') {
+        movement.turnTo(90, 2, .2);
+      } 
+      else if (input2 == 'r') {
+        movement.resetIMUM(); //Reset IMU
 
-      }
+      } 
+      else if (input2 == 'i') {
+        movement.setSpeedM(30, 30);
+      } 
+      else if (input2 == 'k') {
+        movement.setSpeedM(-30, -30);
+      } 
+      else if (input2 == 'j') {
+        movement.setSpeedM(-10, 10);
+      } 
+      else if (input2 == 'l') {
+        movement.setSpeedM(10, -10);
+      } 
+      else if (input2 == 'm') {
+        movement.mowLawn(s1, s2, s3, s4, 15);
+      } 
+      else if (input2 == 's') {
+        movement.sTurn(t1, t2, 15);
+      } 
       else if (input2 == 'g') {
         movement.enableGrass();
-      }
-
+      } 
       else if (input2 == 'h') {
         movement.disableGrass();
-
+      } 
+      else if (input2 == 'c') {
+        movement.curveTo(true,3);
       }
-
-
+      else if (input2 == 'v') {
+        movement.curveTo(false,3);
+      }
       else {
-        /*
-          int commaIndex = input2.indexOf(',');
-          int dashIndex = input2.indexOf('-');
-          int slashIndex = input2.indexOf('/');
-          float kp = commaIndex == -1 ? input2.toFloat() : input2.substring(0, commaIndex).toFloat();
-          float ki = commaIndex == -1 ? 0 : input2.substring(commaIndex + 1).toFloat();
-          float kd = dashIndex == -1 ? 0 : input2.substring(dashIndex + 1).toFloat();
-          float sp = slashIndex == -1 ? 0 : input2.substring(slashIndex + 1).toFloat();
-          premo.setPIDPathFollowing(kp, ki, kd);
-          premo.setPathFollowSpeed(sp);
-          HWSERIAL.print("kp ");
-          HWSERIAL.println(kp);
-          HWSERIAL.print("ki ");
-          HWSERIAL.println(ki);
-          HWSERIAL.print("kd ");
-          HWSERIAL.println(kd);
-        */
-
         int commaIndex = input2.indexOf(',');
         float speed = commaIndex == -1 ? input2.toFloat() : input2.substring(0, commaIndex).toFloat();
         //        headingSetPoint = speed;
@@ -133,43 +115,30 @@ void loop() {
     } else input2 += temp;
   }
 
-
-
   if (micros() - printTimer > 50000) {
-
 
     Point point = movement.getPosition();
     double laser = sub.getLaser();
+    HWSERIAL.println(movement.getIMUM());
 
     HWSERIAL.println(point.x);
     HWSERIAL.println(point.y);
-    HWSERIAL.println(laser);
-    //HWSERIAL.print("yaw");
-    //HWSERIAL.println(sub.getYaw());
+    //    HWSERIAL.print("yaw");
+    //    HWSERIAL.println(sub.getYaw());
+        HWSERIAL.println("laser");
+        HWSERIAL.println(laser);
 
-    //premo.getLocationData();
-   // sub.tracking();
-    
-         if(sub.tracking()){
-            HWSERIAL.println("true");
-          }
-          else {
-            HWSERIAL.println("false");
-          } 
+    // sub.tracking();
 
-
-
-    //  premo.printPath();
-    // movement.spinOnceM();
-    //movement.enableM();
-    //movement.goToPosition(0, p1, 0, 10, 1);
-
-
+    if (sub.tracking()) {
+      HWSERIAL.println("true");
+    } else {
+      HWSERIAL.println("false");
+    }
 
     printTimer = micros();
 
   }
-
 
   if (micros() - ledTimer > 100000) {
     movement.spinOnceM();
@@ -178,6 +147,5 @@ void loop() {
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
 
-  
   movement.computeM();
 }

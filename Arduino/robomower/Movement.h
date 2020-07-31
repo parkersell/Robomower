@@ -8,29 +8,38 @@ class Movement {
   public:
     Movement();
     
-    
+    //Movement functions
     void goToPosition(Point, double, double);
-    void mowLawn(double, Point, Point, Point, Point);
+    void mowLawn(Point, Point, Point, Point, int);
+    void turnTo(double, int, double);
+    void curveTo(boolean, int);
+    void sTurn(Point, Point, int);
+    
+    int input();
+
+    //Motor functions
     void disableM();
     void enableM();
-     void disableGrass();
-    void enableGrass();
     void computeM();
     void setSpeedM(int, int);
-    float getSpeedM();
+    void disableGrass();
+    void enableGrass();
+
+    //SLAM functions
     void initRobot();
     void spinOnceM();
+
+    //IMU functions
+    double getIMUM();
+    void resetIMUM();
+    
     Point getPosition();
     float clip(float, float, float);
-   
 
   private:
     inline double to_radians(double);
     inline double to_degrees(double);
     
-    
-
-
 };
 
 #endif
