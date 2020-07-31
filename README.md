@@ -32,6 +32,7 @@ We have also considered using these systems (found later in the project, and not
 - Password to get into the computer
 
 **Important Terminal Commands**:
+
 Realsense Camera: roslaunch realsense2_camera rs_rgbdwide.launch infra_fps:=15
 - Launches Realsense camera node for d435 and 848x480 resolution, outputs infra1, infra2, and depth
 
@@ -51,6 +52,7 @@ Programming Arduino on PI: Click the Arduino IDE icon on the Desktop
 - Ros.h errors when programming on Windows, thus we compiled the arduino code on the raspberry pi 
 
 **Useful Stuff**:
+
 Image Viewer: rosrun rqt_image_view rqt_image_view
 - Visualizes any published ROS image topics
 
@@ -69,6 +71,7 @@ Overclocked: the pi is overclocked at 2GHz
 - This can be changed in /boot/firmware/usercfg.txt which inherits the config.txt file and keeps it separate for ubuntu’s sake. 
 
 **Stuff that you probably won’t need**:
+
 Kinect Camera: roslaunch freenect_launch freenect.launch
 - Launches kinect camera node
 - Kinect requires power wires to connect to 12V power source
