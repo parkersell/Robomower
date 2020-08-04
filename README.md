@@ -135,6 +135,7 @@ Future Improvements:
 - http://wiki.ros.org/navigation/Tutorials/RobotSetup We followed this tutorial and put our code in robomower_2dnav but didn't get the chance to implement it with d435
 - https://answers.ros.org/question/317419/realsense-d435-rtabmap-pixhawk-imu-robot_localization/?answer=318026#post-id-318026 Consider fusing IMU data and Wheel Encoder data with SLAM data to create more accurate and robust localization 
 - http://wiki.ros.org/rtabmap_ros/Tutorials/RemoteMapping Consider sending sensor data over WiFi to another laptop or computer with ROS that then computes, maps, and sends velocity commands back to the Pi. This would allow for more advanced computations
+- Use a usb processor for the pi to enhance computational abilities https://www.amazon.com/Google-Coral-Accelerator-coprocessor-Raspberry/dp/B07R53D12W or https://store.intelrealsense.com/buy-intel-neural-compute-stick-2.html?cid=sem&source=sa360&campid=2019_q3_egi_us_ntgrs_nach_revs_text-link_brand_bmm_desk_realsense-shopping-ad_o-1lngr_google&ad_group=RealSense+Shopping+Ads&intel_term=PRODUCT_GROUP&sa360id=92700050119513690&gclid=CjwKCAjwjqT5BRAPEiwAJlBuBVPIIMYaDe-IktebsqEzQGetq9hvNiPv6N6X9qo8CBZLc4SeoZ6MlxoCwLYQAvD_BwE&gclsrc=aw.ds
 
 
 
